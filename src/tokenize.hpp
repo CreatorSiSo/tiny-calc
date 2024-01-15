@@ -7,6 +7,8 @@ struct Span {
     size_t len;
 
     Span(size_t start, size_t len) : start(start), len(len) {}
+
+    std::string debug();
     std::string_view src(std::string_view str);
 };
 
@@ -26,9 +28,7 @@ struct Token {
     Token(TokenKind kind, Span span) : kind(kind), span(span) {}
 
     std::string debug(std::string_view src);
-    std::string_view display(std::string_view src);
+    std::string_view src(std::string_view src);
 };
-
-std::string_view Token_to_str(TokenKind self);
 
 std::vector<Token> tokenize(std::string_view str);

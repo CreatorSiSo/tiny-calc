@@ -1,8 +1,16 @@
-#include "tokenize.h"
+#include "tokenize.hpp"
 
 #include <cctype>
 #include <optional>
+#include <sstream>
 #include <string>
+
+std::string Span::debug() {
+    std::stringstream stream;
+    // stream << "Span { start: " << start << ", len: " << len << " }";
+    stream << start << ".." << start + len;
+    return stream.str();
+}
 
 std::string_view Span::src(std::string_view source) {
     assert(start >= 0);
@@ -11,37 +19,35 @@ std::string_view Span::src(std::string_view source) {
 }
 
 std::string Token::debug(std::string_view src) {
-    std::string result;
+    std::stringstream stream;
 
     switch (kind) {
         case TokenKind::Plus:
-            result.append("Plus");
+            stream << "Plus";
             break;
         case TokenKind::Minus:
-            result.append("Minus");
+            stream << "Minus";
             break;
         case TokenKind::Star:
-            result.append("Star");
+            stream << "Star";
             break;
         case TokenKind::Slash:
-            result.append("Slash");
+            stream << "Slash";
             break;
         case TokenKind::Number:
-            result.append("Number");
+            stream << "Number";
             break;
         case TokenKind::Error:
-            result.append("Error");
+            stream << "Error";
             break;
     }
 
-    result.push_back('[');
-    result.append(span.src(src));
-    result.push_back(']');
+    stream << '[' << span.src(src) << ']' << " " << span.debug();
 
-    return result;
+    return stream.str();
 }
 
-std::string_view Token::display(std::string_view src) { return span.src(src); }
+std::string_view Token::src(std::string_view src) { return span.src(src); }
 
 size_t parse_whitespace(std::string_view str) {
     size_t len = 0;
@@ -75,16 +81,17 @@ std::vector<Token> tokenize(std::string_view str) {
     };
 
     while (start < str.length()) {
+        auto rest = str.substr(start);
         char chr = str.at(start);
 
-        size_t number_len = parse_number(str);
+        size_t number_len = parse_number(rest);
         if (number_len > 0) {
             push(TokenKind::Number, Span(start, number_len));
             start += number_len;
             continue;
         }
 
-        size_t whitespace_len = parse_whitespace(str);
+        size_t whitespace_len = parse_whitespace(rest);
         if (whitespace_len > 0) {
             start += whitespace_len;
             continue;
