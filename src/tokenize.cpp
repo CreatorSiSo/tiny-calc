@@ -1,25 +1,24 @@
 #include "tokenize.hpp"
 
+#include <cassert>
 #include <cctype>
 #include <optional>
-#include <sstream>
-#include <string>
 
-std::string Span::debug() {
-    std::stringstream stream;
+String Span::debug() {
+    StringStream stream;
     // stream << "Span { start: " << start << ", len: " << len << " }";
     stream << start << ".." << start + len;
     return stream.str();
 }
 
-std::string_view Span::src(std::string_view source) {
+StringView Span::src(StringView source) {
     assert(start >= 0);
     assert(len > 0);
     return source.substr(start, len);
 }
 
-std::string Token::debug(std::string_view src) {
-    std::stringstream stream;
+String Token::debug(StringView src) {
+    StringStream stream;
 
     switch (kind) {
         case TokenKind::Plus:
@@ -47,9 +46,9 @@ std::string Token::debug(std::string_view src) {
     return stream.str();
 }
 
-std::string_view Token::src(std::string_view src) { return span.src(src); }
+StringView Token::src(StringView src) { return span.src(src); }
 
-size_t parse_whitespace(std::string_view str) {
+static size_t parse_whitespace(StringView str) {
     size_t len = 0;
     for (char chr : str) {
         if (!std::isspace(chr)) break;
@@ -58,7 +57,7 @@ size_t parse_whitespace(std::string_view str) {
     return len;
 }
 
-size_t parse_number(std::string_view str) {
+static size_t parse_number(StringView str) {
     if (!std::isdigit(str.at(0))) return 0;
 
     size_t len = 1;
@@ -72,8 +71,8 @@ size_t parse_number(std::string_view str) {
     return len;
 }
 
-std::vector<Token> tokenize(std::string_view str) {
-    std::vector<Token> tokens;
+Vector<Token> tokenize(StringView str) {
+    Vector<Token> tokens;
     size_t start = 0;
 
     auto push = [&tokens](TokenKind kind, Span span) {

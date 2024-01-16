@@ -1,17 +1,15 @@
 #pragma once
 
-#include <cassert>
-#include <string_view>
-#include <vector>
+#include "common.hpp"
 
 struct Span {
     size_t start;
     size_t len;
 
-    Span(size_t start, size_t len) : start(start), len(len) {}
+    Span(size_t start_val, size_t len_val) : start(start_val), len(len_val) {}
 
-    std::string debug();
-    std::string_view src(std::string_view str);
+    String debug();
+    StringView src(StringView str);
 };
 
 enum class TokenKind {
@@ -27,10 +25,10 @@ struct Token {
     TokenKind kind;
     Span span;
 
-    Token(TokenKind kind, Span span) : kind(kind), span(span) {}
+    Token(TokenKind kind_val, Span span_val) : kind(kind_val), span(span_val) {}
 
-    std::string debug(std::string_view src);
-    std::string_view src(std::string_view src);
+    String debug(StringView src);
+    StringView src(StringView src);
 };
 
-std::vector<Token> tokenize(std::string_view str);
+std::vector<Token> tokenize(StringView str);

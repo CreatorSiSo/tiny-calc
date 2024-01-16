@@ -1,16 +1,10 @@
 #pragma once
 
-#include <memory>
-#include <ostream>
-#include <variant>
-
-template <typename T>
-using Box = std::unique_ptr<T>;
-using Ostream = std::ostream;
+#include "common.hpp"
 
 struct Expr {
+    virtual ~Expr();
     virtual Ostream& write(Ostream& stream) const = 0;
-    virtual ~Expr() {}
 };
 
 Ostream& operator<<(Ostream& out, const Expr& expr);
@@ -19,10 +13,10 @@ struct Number : Expr {
     Number(double value);
     static Box<Expr> alloc(double value);
 
-    Ostream& write(Ostream& stream) const;
+    Ostream& write(Ostream& stream) const override;
 
    private:
-    double value;
+    double m_value;
 };
 
 enum class BinaryOp {
@@ -37,10 +31,10 @@ struct BinaryExpr : Expr {
     BinaryExpr(BinaryOp op, Box<Expr> lhs, Box<Expr> rhs);
     static Box<Expr> alloc(BinaryOp op, Box<Expr> lhs, Box<Expr> rhs);
 
-    Ostream& write(Ostream& stream) const;
+    Ostream& write(Ostream& stream) const override;
 
    private:
-    BinaryOp op;
-    Box<Expr> lhs;
-    Box<Expr> rhs;
+    BinaryOp m_op;
+    Box<Expr> m_lhs;
+    Box<Expr> m_rhs;
 };
