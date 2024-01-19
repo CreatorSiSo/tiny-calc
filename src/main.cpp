@@ -62,6 +62,7 @@ int main() {
     };
     string line;
 
+    // Read evaluate print loop (repl)
     writeln(out, "Welcome to tiny-calc!\nType :help when you are lost =)");
     while (true) {
         write(out, ">> ");
@@ -84,10 +85,14 @@ int main() {
             }
         }
 
-        auto ast = Parser(tokens, line).parse_expr();
+        auto ast = Parser(std::move(tokens), line).parse_expr();
+        if (!ast.has_value()) {
+            writeln(out, "Error: while parsing");
+            return -1;
+        }
         if (config.print_ast) {
             writeln(out, "Ast:");
-            writeln(out, "{}{}", indent, *ast);
+            writeln(out, "{}{}", indent, **ast);
         }
 
         // TODO eval

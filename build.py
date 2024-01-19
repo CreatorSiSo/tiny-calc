@@ -2,6 +2,7 @@
 
 import subprocess
 import os
+import sys
 
 project_name = "tiny-calc"
 flags = "-std=c++23 -fdiagnostics-color -Wall -Wno-c++98-compat -Wno-padded"
@@ -21,3 +22,5 @@ if not error:
     paths = " ".join([f"build/{unit}.o" for unit in units])
     cmd = f"sccache g++ {paths} -o {project_name}"
     subprocess.call(cmd, shell=True)
+else:
+    sys.exit(-1)
