@@ -6,11 +6,12 @@
 #include "parse.hpp"
 #include "tokenize.hpp"
 
-static void print_help(Ostream& out) {
-    out << ":help    Print command help\n"
-        << ":quit    Exit calculator (or press CTRL+C)\n"
-        << ":tokens  Toggle printing the tokens\n"
-        << ":ast     Toggle printing the ast\n";
+static void write_help(ostream& out) {
+    write(out,
+          ":help    Print command help\n"
+          ":quit    Exit calculator (or press CTRL+C)\n"
+          ":tokens  Toggle printing the tokens\n"
+          ":ast     Toggle printing the ast\n");
 }
 
 struct Config {
@@ -18,25 +19,26 @@ struct Config {
     bool print_ast;
 };
 
-static void run_command(StringView name, Config& config, Ostream& out) {
+static void run_command(string_view name, Config& config, ostream& out) {
     if (name == "help")
-        print_help(out);
+        write_help(out);
     else if (name == "tokens")
         config.print_tokens = !config.print_tokens;
     else if (name == "ast")
         config.print_ast = !config.print_ast;
     else if (name == "quit")
         exit(0);
-    else
-        out << "Error: Unkown command '" << name << "'\n"
-            << "Note: Type :help for a list of valid commands\n";
+    else {
+        writeln(out, "Error: Unkown command '{}'", name);
+        writeln(out, "Note: Type :help for a list of valid commands");
+    }
 }
 
 enum class InputEnd {
     Newline,
     Eof,
 };
-static InputEnd get_input(Istream& in, String& line) {
+static InputEnd get_input(istream& in, string& line) {
     line.clear();
 
     while (true) {
@@ -50,20 +52,21 @@ static InputEnd get_input(Istream& in, String& line) {
 }
 
 int main() {
-    Istream& in = std::cin;
-    Ostream& out = std::cout;
+    istream& in = std::cin;
+    ostream& out = std::cout;
 
+    constexpr auto indent = "    ";
     Config config{
         .print_tokens = true,
         .print_ast = true,
     };
-    String line;
+    string line;
 
-    out << "Welcome to tiny-calc!\nType :help when you are lost =)\n";
+    writeln(out, "Welcome to tiny-calc!\nType :help when you are lost =)");
     while (true) {
-        out << ">> ";
+        write(out, ">> ");
         if (get_input(in, line) == InputEnd::Eof) {
-            out << "CTRL+D";
+            write(out, "CTRL+D");
             return 0;
         }
         if (line.empty()) continue;
@@ -75,22 +78,22 @@ int main() {
 
         auto tokens = tokenize(line);
         if (config.print_tokens) {
-            out << "Tokens:\n";
+            writeln(out, "Tokens:");
             for (auto token : tokens) {
-                out << "    " << token.debug(line) << "\n";
+                writeln(out, "{}{}", indent, token.debug(line));
             }
         }
 
-        // auto ast =
-        //     BinaryExpr(BinaryOp::Add,
-        //                BinaryExpr::alloc(BinaryOp::Cos, Number::alloc(0.0),
-        //                                  Number::alloc(8237364536.2304823084)),
-        //                Number::alloc(1.0));
-        auto ast = parse(line, tokens);
+        auto ast = unique_ptr<Expr>(new BinaryExpr(
+            BinaryOp::Add,
+            BinaryExpr::alloc(BinaryOp::Cos, Number::alloc(0.0),
+                              Number::alloc(8237364536.2304823084)),
+            Number::alloc(1.0)));
+        // auto ast = parse(line, tokens);
         if (ast == nullptr) continue;
         if (config.print_ast) {
-            out << "Ast:\n"
-                << "    " << *ast << "\n";
+            writeln(out, "Ast:");
+            writeln(out, "{}{}", indent, *ast);
         }
 
         // TODO eval

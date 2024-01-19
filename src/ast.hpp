@@ -4,16 +4,23 @@
 
 struct Expr {
     virtual ~Expr();
-    virtual Ostream& write(Ostream& stream) const = 0;
+    virtual string display() const = 0;
 };
 
-Ostream& operator<<(Ostream& out, const Expr& expr);
+template <>
+struct std::formatter<Expr> {
+    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
+
+    auto format(const Expr& obj, std::format_context& ctx) const {
+        return std::format_to(ctx.out(), "{}", obj.display());
+    }
+};
 
 struct Number : Expr {
     Number(double value);
-    static Box<Expr> alloc(double value);
+    static unique_ptr<Expr> alloc(double value);
 
-    Ostream& write(Ostream& stream) const override;
+    string display() const override;
 
    private:
     double m_value;
@@ -28,13 +35,14 @@ enum class BinaryOp {
 };
 
 struct BinaryExpr : Expr {
-    BinaryExpr(BinaryOp op, Box<Expr> lhs, Box<Expr> rhs);
-    static Box<Expr> alloc(BinaryOp op, Box<Expr> lhs, Box<Expr> rhs);
+    BinaryExpr(BinaryOp op, unique_ptr<Expr> lhs, unique_ptr<Expr> rhs);
+    static unique_ptr<Expr> alloc(BinaryOp op, unique_ptr<Expr> lhs,
+                                  unique_ptr<Expr> rhs);
 
-    Ostream& write(Ostream& stream) const override;
+    string display() const override;
 
    private:
     BinaryOp m_op;
-    Box<Expr> m_lhs;
-    Box<Expr> m_rhs;
+    unique_ptr<Expr> m_lhs;
+    unique_ptr<Expr> m_rhs;
 };

@@ -2,12 +2,12 @@
 
 #include <ranges>
 
-Box<Expr> parse(StringView src, std::span<Token> tokens) {
+unique_ptr<Expr> parse(string_view src, std::span<Token> tokens) {
     auto token = tokens[0];
 
     if (token.kind == TokenKind::Error) {
         // TODO Emit Report insted
-        std::cerr << "Error: Unexpected Token '" << token.src(src) << "'\n";
+        writeln(std::cerr, "Error: Unexpected Token '{}'\n", token.src(src));
         return nullptr;
     }
 
@@ -16,16 +16,18 @@ Box<Expr> parse(StringView src, std::span<Token> tokens) {
     }
 
     if (token.kind == TokenKind::Plus) {
+        // vector<uint8_t> stack = {};
+
         // if (stack.size() < 2) {
-        //     std::cerr << "Error: Expected two arguments, but got "
-        //               << stack.size() << "\n";
+        //     writeln(std::cerr, "Error: Expected two arguments, but got {}",
+        //             stack.size());
         //     return nullptr;
         // }
 
-        // for (auto& expr : stack) std::cout << *expr << ",\n";
+        // for (auto& expr : stack) println("{},", *expr);
 
-        // Box<Expr> lhs = pop();
-        // Box<Expr> rhs = pop();
+        // unique_ptr<Expr> lhs = pop();
+        // unique_ptr<Expr> rhs = pop();
 
         // // BinaryExpr::alloc(BinaryOp::Add, std::move(lhs),
         //     std::move(rhs));
@@ -34,4 +36,4 @@ Box<Expr> parse(StringView src, std::span<Token> tokens) {
     return nullptr;
 }
 
-BinaryExpr parse_binary(StringView src, std::span<Token> tokens) {}
+// BinaryExpr parse_binary(string_view src, std::span<Token> tokens) {}

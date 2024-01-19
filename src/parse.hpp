@@ -6,4 +6,4 @@
 #include "common.hpp"
 #include "tokenize.hpp"
 
-Box<Expr> parse(StringView src, std::span<Token> tokens);
+unique_ptr<Expr> parse(string_view src, std::span<Token> tokens);

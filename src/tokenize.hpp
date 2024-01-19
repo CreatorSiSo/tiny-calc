@@ -8,8 +8,8 @@ struct Span {
 
     Span(size_t start_val, size_t len_val) : start(start_val), len(len_val) {}
 
-    String debug();
-    StringView src(StringView str);
+    string debug();
+    string_view src(string_view str);
 };
 
 enum class TokenKind {
@@ -27,8 +27,9 @@ struct Token {
 
     Token(TokenKind kind_val, Span span_val) : kind(kind_val), span(span_val) {}
 
-    String debug(StringView src);
-    StringView src(StringView src);
+    string_view name();
+    string_view src(string_view src);
+    string debug(string_view src);
 };
 
-std::vector<Token> tokenize(StringView str);
+std::vector<Token> tokenize(string_view str);
