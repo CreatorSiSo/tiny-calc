@@ -3,6 +3,7 @@
 
 #include "ast.hpp"
 #include "common.hpp"
+#include "parse.hpp"
 #include "tokenize.hpp"
 
 static void print_help(Ostream& out) {
@@ -80,14 +81,16 @@ int main() {
             }
         }
 
-        auto ast =
-            BinaryExpr(BinaryOp::Add,
-                       BinaryExpr::alloc(BinaryOp::Cos, Number::alloc(0.0),
-                                         Number::alloc(8237364536.2304823084)),
-                       Number::alloc(1.0));
+        // auto ast =
+        //     BinaryExpr(BinaryOp::Add,
+        //                BinaryExpr::alloc(BinaryOp::Cos, Number::alloc(0.0),
+        //                                  Number::alloc(8237364536.2304823084)),
+        //                Number::alloc(1.0));
+        auto ast = parse(line, tokens);
+        if (ast == nullptr) continue;
         if (config.print_ast) {
             out << "Ast:\n"
-                << "    " << ast << "\n";
+                << "    " << *ast << "\n";
         }
 
         // TODO eval

@@ -1,8 +1,7 @@
 #pragma once
 
-#include <istream>
+#include <iostream>
 #include <memory>
-#include <ostream>
 #include <sstream>
 #include <vector>
 
