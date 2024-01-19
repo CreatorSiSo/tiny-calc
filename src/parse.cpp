@@ -1,39 +1,67 @@
 #include "parse.hpp"
 
-#include <ranges>
-
-unique_ptr<Expr> parse(string_view src, std::span<Token> tokens) {
-    auto token = tokens[0];
-
-    if (token.kind == TokenKind::Error) {
-        // TODO Emit Report insted
-        writeln(std::cerr, "Error: Unexpected Token '{}'\n", token.src(src));
-        return nullptr;
+Parser::Parser(vector<Token> tokens, string_view source)
+    : m_current(0), m_tokens(tokens), m_source(source) {
+    // Insert end of file token
+    size_t end = 0;
+    if (!m_tokens.empty()) {
+        Span last_span = m_tokens.back().span;
+        end = last_span.start + last_span.len;
     }
-
-    if (token.kind == TokenKind::Number) {
-        return Number::alloc(0.0);
-    }
-
-    if (token.kind == TokenKind::Plus) {
-        // vector<uint8_t> stack = {};
-
-        // if (stack.size() < 2) {
-        //     writeln(std::cerr, "Error: Expected two arguments, but got {}",
-        //             stack.size());
-        //     return nullptr;
-        // }
-
-        // for (auto& expr : stack) println("{},", *expr);
-
-        // unique_ptr<Expr> lhs = pop();
-        // unique_ptr<Expr> rhs = pop();
-
-        // // BinaryExpr::alloc(BinaryOp::Add, std::move(lhs),
-        //     std::move(rhs));
-    }
-
-    return nullptr;
+    m_tokens.push_back(Token(TokenKind::EndOfFile, Span(end, 0)));
 }
 
-// BinaryExpr parse_binary(string_view src, std::span<Token> tokens) {}
+static auto kind_to_operator(TokenKind kind) -> std::optional<BinaryOp> {
+    switch (kind) {
+        case TokenKind::Plus:
+            return BinaryOp::Add;
+        case TokenKind::Minus:
+            return BinaryOp::Sub;
+        case TokenKind::Star:
+            return BinaryOp::Mul;
+        case TokenKind::Slash:
+            return BinaryOp::Div;
+        default:
+            return {};
+    }
+}
+
+auto Parser::parse_expr() -> unique_ptr<Expr> {
+    auto token = next();
+
+    if (token.kind == TokenKind::Number) {
+        return unique_ptr<Expr>(new Number(0.0));
+    }
+
+    if (const auto op = kind_to_operator(token.kind); op.has_value()) {
+        auto lhs = parse_expr();
+        auto rhs = parse_expr();
+        return unique_ptr<Expr>(
+            new BinaryExpr(*op, std::move(lhs), std::move(rhs)));
+    }
+
+    // TODO return error
+    return unique_ptr<Expr>(new Number(-1.0));
+}
+
+auto Parser::expect(TokenKind expected) -> std::expected<Token, ParseError> {
+    const Token& token = next();
+    if (token.kind != expected) {
+        return std::unexpected(ParseError{
+            .expected = expected,
+            .found = token,
+        });
+    }
+    return token;
+}
+
+auto Parser::next() -> const Token& {
+    if (m_current < m_tokens.size()) {
+        const Token& result = m_tokens.at(m_current);
+        m_current += 1;
+        return result;
+    } else {
+        // last token is always end of file token
+        return m_tokens.back();
+    }
+}

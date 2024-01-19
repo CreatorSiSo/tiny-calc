@@ -2,8 +2,8 @@
 
 #include <cassert>
 #include <cctype>
-#include <optional>
-#include <format>
+
+#include "common.hpp"
 
 string Span::debug() {
     string_stream stream;
@@ -32,6 +32,8 @@ string_view Token::name() {
             return "Number";
         case TokenKind::Error:
             return "Error";
+        case TokenKind::EndOfFile:
+            return "EndOfFile";
     }
     // Unreachable
     abort();

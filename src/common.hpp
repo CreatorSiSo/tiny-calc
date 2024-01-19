@@ -1,10 +1,10 @@
 #pragma once
 
+#include <format>
 #include <iostream>
 #include <memory>
 #include <sstream>
 #include <vector>
-#include <format>
 
 template <typename T>
 using unique_ptr = std::unique_ptr<T>;

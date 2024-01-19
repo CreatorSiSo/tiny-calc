@@ -84,13 +84,7 @@ int main() {
             }
         }
 
-        auto ast = unique_ptr<Expr>(new BinaryExpr(
-            BinaryOp::Add,
-            BinaryExpr::alloc(BinaryOp::Cos, Number::alloc(0.0),
-                              Number::alloc(8237364536.2304823084)),
-            Number::alloc(1.0)));
-        // auto ast = parse(line, tokens);
-        if (ast == nullptr) continue;
+        auto ast = Parser(tokens, line).parse_expr();
         if (config.print_ast) {
             writeln(out, "Ast:");
             writeln(out, "{}{}", indent, *ast);
