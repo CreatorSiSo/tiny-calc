@@ -1,19 +1,6 @@
 #include "tokenize.hpp"
 
-#include <cassert>
 #include <cctype>
-
-#include "common.hpp"
-
-auto Span::debug() const -> string {
-    return std::format("{}..{}", start, start + len);
-}
-
-auto Span::source(string_view source) const -> string_view {
-    assert(start >= 0);
-    assert(len > 0);
-    return source.substr(start, len);
-}
 
 auto Token::name() const -> string_view {
     switch (kind) {

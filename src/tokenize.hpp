@@ -1,16 +1,7 @@
 #pragma once
 
 #include "common.hpp"
-
-struct Span {
-    size_t start;
-    size_t len;
-
-    Span(size_t start_val, size_t len_val) : start(start_val), len(len_val) {}
-
-    auto debug() const -> string;
-    auto source(string_view str) const -> string_view;
-};
+#include "report.hpp"
 
 enum class TokenKind {
     Plus,

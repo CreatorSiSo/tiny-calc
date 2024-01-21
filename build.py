@@ -6,7 +6,7 @@ import sys
 
 project_name = "tiny-calc"
 flags = "-std=c++23 -fdiagnostics-color -Wall -Wno-c++98-compat -Wno-padded"
-units = ["chunk", "compile", "interpret", "main", "tokenize"]
+units = ["chunk", "compile", "interpret", "main", "report", "tokenize"]
 
 if not os.path.exists("build"):
     os.makedirs("build")

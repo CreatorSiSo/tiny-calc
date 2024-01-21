@@ -1,10 +1,10 @@
 #include <cctype>
 #include <cmath>
-#include <iostream>
 
 #include "common.hpp"
 #include "compile.hpp"
 #include "interpret.hpp"
+#include "report.hpp"
 #include "tokenize.hpp"
 
 struct Config {
@@ -49,37 +49,6 @@ static void write_parse_error(const ParseError& error, ostream& out) {
     }
 }
 
-static auto repeat(string_view value, uint32_t amount) -> string {
-    string result;
-    for (uint32_t i = 0; i < amount; i += 1) {
-        result.append(value);
-    }
-    return result;
-}
-
-static void write_annotation(ostream& out, string_view input,
-                             const vector<Span>& spans, string message) {
-    // largest start of all spans
-    size_t start = 0;
-    string underlines(input.size(), ' ');
-    for (Span span : spans) {
-        if (span.start > start) start = span.start;
-        underlines.replace(span.start, span.len,
-                           repeat("^", std::max(span.len, (size_t)1)));
-    }
-
-    // TODO calculate line and column
-    size_t line = 1;
-    for (char c : input.substr(0, start)) {
-        if (c == '\n') line += 1;
-    }
-
-    writeln(out, "Error: {}", message);
-    writeln(out, "  ╭──[repl:{}:{}]", line, 0);
-    writeln(out, "  │  {}", input);
-    writeln(out, "──╯  {}", underlines);
-}
-
 enum class InputEnd {
     Newline,
     Eof,
@@ -113,7 +82,8 @@ int main() {
     writeln(out, "Welcome to tiny-calc!\nType :help when you are lost =)");
     while (true) {
         write(out, ">> ");
-        if (get_input(in, line) == InputEnd::Eof) {
+        auto input_end = get_input(in, line);
+        if (input_end == InputEnd::Eof) {
             write(out, "CTRL+D");
             return 0;
         }
@@ -125,47 +95,50 @@ int main() {
         }
 
         auto tokens = tokenize(line);
-        if (config.print_tokens) {
-            writeln(out, "Tokens:");
-            for (const auto& token : tokens) {
-                writeln(out, "{}{}", indent, token.debug(line));
+        {
+            if (config.print_tokens) {
+                writeln(out, "Tokens:");
+                for (const auto& token : tokens) {
+                    writeln(out, "{}{}", indent, token.debug(line));
+                }
+            }
+            vector<Span> error_spans;
+            for (auto& token : tokens) {
+                if (token.kind == TokenKind::Error)
+                    error_spans.push_back(token.span);
+            }
+            if (!error_spans.empty()) {
+                string message =
+                    error_spans.size() > 1 ? "Invalid Tokens" : "Invalid Token";
+                write_report(out, line, Report(message, error_spans));
+                continue;
             }
         }
 
-        vector<Span> error_spans;
-        for (auto& token : tokens) {
-            if (token.kind == TokenKind::Error)
-                error_spans.push_back(token.span);
-        }
-        if (!error_spans.empty()) {
-            write_annotation(
-                out, line, error_spans,
-                error_spans.size() > 1 ? "Invalid Tokens" : "Invalid Token");
-            continue;
-        }
-
-        auto parse_result = Compiler::compile(std::move(tokens), line);
-        if (!parse_result.has_value()) {
-            const auto& error = parse_result.error();
-            write_parse_error(error, out);
-            continue;
-        }
-        if (config.print_chunks) {
-            const auto& op_codes = parse_result->op_codes();
-            const auto& literals = parse_result->literals();
-
-            writeln(out, "OpCodes:");
-            for (size_t i = 0; i < op_codes.size(); i += 1) {
-                writeln(out, "{}[{}] {}", indent, i,
-                        op_code_to_string(op_codes[i]));
+        auto maybe_chunk = Compiler::compile(std::move(tokens), line);
+        {
+            if (!maybe_chunk.has_value()) {
+                const auto& error = maybe_chunk.error();
+                write_parse_error(error, out);
+                continue;
             }
-            writeln(out, "Literals:");
-            for (size_t i = 0; i < literals.size(); i += 1) {
-                writeln(out, "{}[{}] {}", indent, i, literals[i]);
+            if (config.print_chunks) {
+                const auto& op_codes = maybe_chunk->op_codes();
+                const auto& literals = maybe_chunk->literals();
+
+                writeln(out, "OpCodes:");
+                for (size_t i = 0; i < op_codes.size(); i += 1) {
+                    writeln(out, "{}[{}] {}", indent, i,
+                            op_code_to_string(op_codes[i]));
+                }
+                writeln(out, "Literals:");
+                for (size_t i = 0; i < literals.size(); i += 1) {
+                    writeln(out, "{}[{}] {}", indent, i, literals[i]);
+                }
             }
         }
 
-        auto result = interpret(std::move(*parse_result));
+        auto result = interpret(std::move(*maybe_chunk));
         writeln(out, "{}", result);
     }
 }
