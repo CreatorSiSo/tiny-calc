@@ -82,10 +82,9 @@ static auto validate_number(string_view str) -> size_t {
     return len;
 }
 
-auto tokenize(string_view str) -> std::pair<vector<Token>, bool> {
+auto tokenize(string_view str) -> vector<Token> {
     vector<Token> tokens;
     size_t start = 0;
-    bool contains_error = false;
 
     auto push = [&tokens](TokenKind kind, Span span) {
         tokens.push_back(Token(kind, span));
@@ -123,12 +122,11 @@ auto tokenize(string_view str) -> std::pair<vector<Token>, bool> {
                 push(TokenKind::Slash, Span(start, 1));
                 break;
             default:
-                contains_error = true;
                 push(TokenKind::Error, Span(start, 1));
                 break;
         }
         start += 1;
     }
 
-    return std::make_pair(tokens, contains_error);
+    return tokens;
 }

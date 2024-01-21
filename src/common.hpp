@@ -41,6 +41,7 @@ inline void println(std::format_string<Args&...> fmt, Args&&... args) {
     writeln(std::cout, fmt, args...);
 }
 
+/// @brief Used by `panic` to capture the `std::source_location` of the caller.
 template <typename... Args>
 struct PanicFormat {
     template <class T>
@@ -53,6 +54,10 @@ struct PanicFormat {
     std::source_location loc;
 };
 
+/// @brief Prints the provided message and aborts.
+/// @details See `std::format` on how formatting works.
+/// @param fmt Format string to inserted arguments into.
+/// @param ...args The arguments inserted into `fmt`.
 template <typename... Args>
 [[noreturn]] inline void panic(PanicFormat<std::type_identity_t<Args>...> fmt,
                                Args&&... args) {

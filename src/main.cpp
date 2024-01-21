@@ -1,4 +1,5 @@
 #include <cctype>
+#include <cmath>
 #include <iostream>
 
 #include "common.hpp"
@@ -48,6 +49,37 @@ static void write_parse_error(const ParseError& error, ostream& out) {
     }
 }
 
+static auto repeat(string_view value, uint32_t amount) -> string {
+    string result;
+    for (uint32_t i = 0; i < amount; i += 1) {
+        result.append(value);
+    }
+    return result;
+}
+
+static void write_annotation(ostream& out, string_view input,
+                             const vector<Span>& spans, string message) {
+    // largest start of all spans
+    size_t start = 0;
+    string underlines(input.size(), ' ');
+    for (Span span : spans) {
+        if (span.start > start) start = span.start;
+        underlines.replace(span.start, span.len,
+                           repeat("^", std::max(span.len, (size_t)1)));
+    }
+
+    // TODO calculate line and column
+    size_t line = 1;
+    for (char c : input.substr(0, start)) {
+        if (c == '\n') line += 1;
+    }
+
+    writeln(out, "Error: {}", message);
+    writeln(out, "  ╭──[repl:{}:{}]", line, 0);
+    writeln(out, "  │  {}", input);
+    writeln(out, "──╯  {}", underlines);
+}
+
 enum class InputEnd {
     Newline,
     Eof,
@@ -72,8 +104,8 @@ int main() {
 
     constexpr auto indent = "    ";
     Config config{
-        .print_tokens = true,
-        .print_chunks = true,
+        .print_tokens = false,
+        .print_chunks = false,
     };
     string line;
 
@@ -92,21 +124,27 @@ int main() {
             continue;
         }
 
-        auto tokenize_result = tokenize(line);
+        auto tokens = tokenize(line);
         if (config.print_tokens) {
             writeln(out, "Tokens:");
-            for (const auto& token : tokenize_result.first) {
+            for (const auto& token : tokens) {
                 writeln(out, "{}{}", indent, token.debug(line));
             }
         }
-        if (tokenize_result.second) {
-            // TODO Print errors
-            // Error while tokenizing
+
+        vector<Span> error_spans;
+        for (auto& token : tokens) {
+            if (token.kind == TokenKind::Error)
+                error_spans.push_back(token.span);
+        }
+        if (!error_spans.empty()) {
+            write_annotation(
+                out, line, error_spans,
+                error_spans.size() > 1 ? "Invalid Tokens" : "Invalid Token");
             continue;
         }
 
-        auto parse_result =
-            Compiler::compile(std::move(tokenize_result.first), line);
+        auto parse_result = Compiler::compile(std::move(tokens), line);
         if (!parse_result.has_value()) {
             const auto& error = parse_result.error();
             write_parse_error(error, out);

@@ -65,7 +65,7 @@ auto Compiler::parse_expr() -> std::optional<ParseError> {
         return {};
     }
 
-    // TODO What should be done here?
+    // TODO Return error: Expected expression found {token}
     panic("Todo");
 }
 

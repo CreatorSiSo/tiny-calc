@@ -33,4 +33,4 @@ struct Token {
     auto debug(string_view src) const -> string;
 };
 
-auto tokenize(string_view str) -> std::pair<vector<Token>, bool>;
+auto tokenize(string_view str) -> vector<Token>;
