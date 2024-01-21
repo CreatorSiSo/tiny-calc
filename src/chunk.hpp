@@ -11,6 +11,8 @@ enum class OpCode {
     Literal,
 };
 
+auto op_code_to_string(OpCode op_code) -> string_view;
+
 struct Chunk {
     Chunk(vector<OpCode>&& m_op_codes, vector<double>&& m_literals);
 
