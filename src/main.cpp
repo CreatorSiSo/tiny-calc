@@ -2,8 +2,8 @@
 #include <iostream>
 
 #include "common.hpp"
+#include "compile.hpp"
 #include "interpret.hpp"
-#include "parse.hpp"
 #include "tokenize.hpp"
 
 struct Config {
@@ -100,7 +100,7 @@ int main() {
             }
         }
 
-        auto parse_result = Parser::parse(std::move(tokens), line);
+        auto parse_result = Compiler::compile(std::move(tokens), line);
         if (!parse_result.has_value()) {
             const auto& error = parse_result.error();
             write_parse_error(error, out);
@@ -119,6 +119,6 @@ int main() {
         }
 
         auto eval_result = interpret(std::move(*parse_result));
-        // TODO eval
+        writeln(out, "{}", eval_result);
     }
 }

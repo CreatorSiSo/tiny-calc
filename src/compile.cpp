@@ -1,15 +1,15 @@
-#include "parse.hpp"
+#include "compile.hpp"
 
-auto Parser::parse(vector<Token>&& tokens, string_view source)
+auto Compiler::compile(vector<Token>&& tokens, string_view source)
     -> std::expected<Chunk, ParseError> {
-    Parser parser(std::move(tokens), source);
+    Compiler parser(std::move(tokens), source);
     if (auto err = parser.parse_expr(); err.has_value()) {
         return std::unexpected(*err);
     }
     return Chunk(std::move(parser.m_op_codes), std::move(parser.m_literals));
 }
 
-Parser::Parser(vector<Token>&& tokens, string_view source)
+Compiler::Compiler(vector<Token>&& tokens, string_view source)
     : m_current(0), m_tokens(tokens), m_source(source) {
     // Insert end of file token
     size_t end = 0;
@@ -42,7 +42,7 @@ ParseError::ParseError(ParseError::Number error, Span span)
 
 /// @brief Parses tokens into an ast of expressions, mutates Parser.
 /// @return Pointer to an upcasted expression tree.
-auto Parser::parse_expr() -> std::optional<ParseError> {
+auto Compiler::parse_expr() -> std::optional<ParseError> {
     const Token& token = next();
 
     if (token.kind == TokenKind::Number) {
@@ -69,7 +69,7 @@ auto Parser::parse_expr() -> std::optional<ParseError> {
     panic("Todo");
 }
 
-auto Parser::parse_number(Span span)
+auto Compiler::parse_number(Span span)
     -> std::expected<double, ParseError::Number> {
     string source;
     for (auto chr : span.source(m_source)) {
@@ -84,7 +84,7 @@ auto Parser::parse_number(Span span)
     }
 }
 
-auto Parser::expect(TokenKind expected)
+auto Compiler::expect(TokenKind expected)
     -> std::expected<Token, ParseError::ExpectedFound> {
     const Token& token = next();
     if (token.kind != expected) {
@@ -96,7 +96,7 @@ auto Parser::expect(TokenKind expected)
     return token;
 }
 
-auto Parser::next() -> const Token& {
+auto Compiler::next() -> const Token& {
     if (m_current < m_tokens.size()) {
         const Token& result = m_tokens.at(m_current);
         m_current += 1;

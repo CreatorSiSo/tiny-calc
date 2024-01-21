@@ -26,13 +26,13 @@ struct ParseError {
 // expr ::= binary | number
 // binary ::= operator expr expr | number
 // number ::= digit (digit | "_")* ("." (digit | "_")*)?
-struct Parser {
+struct Compiler {
     /// @param tokens Enforcing move here to avoid accidental copying.
-    static auto parse(vector<Token>&& tokens, string_view source)
+    static auto compile(vector<Token>&& tokens, string_view source)
         -> std::expected<Chunk, ParseError>;
 
    private:
-    Parser(vector<Token>&& tokens, string_view source);
+    Compiler(vector<Token>&& tokens, string_view source);
 
     auto parse_expr() -> std::optional<ParseError>;
     auto parse_number(Span span) -> std::expected<double, ParseError::Number>;
