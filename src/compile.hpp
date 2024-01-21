@@ -17,7 +17,7 @@ struct Compiler {
    private:
     Compiler(vector<Token>&& tokens, string_view source);
 
-    auto parse_expr() -> std::optional<Report>;
+    auto compile_expr() -> std::optional<Report>;
     auto parse_number(Span span) -> std::expected<double, Report>;
 
     auto next() -> const Token&;

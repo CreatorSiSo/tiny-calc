@@ -1,11 +1,15 @@
 #include "compile.hpp"
 
+#include <algorithm>
+
 auto Compiler::compile(vector<Token>&& tokens, string_view source)
     -> std::expected<Chunk, Report> {
     Compiler parser(std::move(tokens), source);
-    if (const auto report = parser.parse_expr(); report.has_value()) {
+    if (const auto report = parser.compile_expr(); report.has_value()) {
         return std::unexpected(*report);
     }
+    std::reverse(parser.m_op_codes.begin(), parser.m_op_codes.end());
+    std::reverse(parser.m_literals.begin(), parser.m_literals.end());
     return Chunk(std::move(parser.m_op_codes), std::move(parser.m_literals));
 }
 
@@ -20,7 +24,7 @@ Compiler::Compiler(vector<Token>&& tokens, string_view source)
     m_tokens.push_back(Token(TokenKind::EndOfInput, Span(end, 0)));
 }
 
-static auto kind_to_op_code(TokenKind kind) -> std::optional<OpCode> {
+static auto kind_to_binary_op(TokenKind kind) -> std::optional<OpCode> {
     switch (kind) {
         case TokenKind::Plus:
             return OpCode::Add;
@@ -37,7 +41,7 @@ static auto kind_to_op_code(TokenKind kind) -> std::optional<OpCode> {
 
 /// @brief Parses tokens into an ast of expressions, mutates Parser.
 /// @return Pointer to an upcasted expression tree.
-auto Compiler::parse_expr() -> std::optional<Report> {
+auto Compiler::compile_expr() -> std::optional<Report> {
     const Token& token = next();
 
     if (token.kind == TokenKind::Number) {
@@ -50,13 +54,20 @@ auto Compiler::parse_expr() -> std::optional<Report> {
         return result.error();
     }
 
-    if (const auto op_code = kind_to_op_code(token.kind); op_code.has_value()) {
-        const auto err_lhs = parse_expr();
-        if (err_lhs.has_value()) return err_lhs;
-        const auto err_rhs = parse_expr();
-        if (err_rhs.has_value()) return err_rhs;
+    if (token.kind == TokenKind::C) {
+        m_op_codes.push_back(OpCode::Cos);
 
+        if (auto err_rhs = compile_expr(); err_rhs.has_value()) return err_rhs;
+
+        return {};
+    }
+
+    if (auto op_code = kind_to_binary_op(token.kind); op_code.has_value()) {
         m_op_codes.push_back(*op_code);
+
+        if (auto err_lhs = compile_expr(); err_lhs.has_value()) return err_lhs;
+        if (auto err_rhs = compile_expr(); err_rhs.has_value()) return err_rhs;
+
         return {};
     }
 

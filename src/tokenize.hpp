@@ -4,6 +4,7 @@
 #include "report.hpp"
 
 enum class TokenKind {
+    C,
     Plus,
     Minus,
     Star,

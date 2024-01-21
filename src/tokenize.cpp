@@ -4,6 +4,8 @@
 
 auto Token::name() const -> string_view {
     switch (kind) {
+        case TokenKind::C:
+            return "C";
         case TokenKind::Plus:
             return "Plus";
         case TokenKind::Minus:
@@ -96,6 +98,9 @@ auto tokenize(string_view str) -> vector<Token> {
 
         // Operators
         switch (chr) {
+            case 'c':
+                push(TokenKind::C, Span(start, 1));
+                break;
             case '+':
                 push(TokenKind::Plus, Span(start, 1));
                 break;
