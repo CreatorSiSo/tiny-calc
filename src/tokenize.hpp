@@ -8,8 +8,8 @@ struct Span {
 
     Span(size_t start_val, size_t len_val) : start(start_val), len(len_val) {}
 
-    string debug();
-    string_view source(string_view str);
+    string debug() const;
+    string_view source(string_view str) const;
 };
 
 enum class TokenKind {

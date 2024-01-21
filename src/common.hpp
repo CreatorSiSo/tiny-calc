@@ -3,6 +3,7 @@
 #include <format>
 #include <iostream>
 #include <memory>
+#include <source_location>
 #include <sstream>
 #include <vector>
 
@@ -38,4 +39,25 @@ inline void print(std::format_string<Args&...> fmt, Args&&... args) {
 template <typename... Args>
 inline void println(std::format_string<Args&...> fmt, Args&&... args) {
     writeln(std::cout, fmt, args...);
+}
+
+template <typename... Args>
+struct PanicFormat {
+    template <class T>
+    consteval PanicFormat(
+        const T& s,
+        std::source_location loc = std::source_location::current()) noexcept
+        : fmt{s}, loc{loc} {}
+
+    std::format_string<Args...> fmt;
+    std::source_location loc;
+};
+
+template <typename... Args>
+[[noreturn]] inline void panic(PanicFormat<std::type_identity_t<Args>...> fmt,
+                               Args&&... args) {
+    auto msg = std::format(fmt.fmt, std::forward<Args>(args)...);
+    writeln(std::cerr, "panicked at {}:{}:{}: {}", fmt.loc.file_name(),
+            fmt.loc.line(), fmt.loc.column(), msg);
+    abort();
 }

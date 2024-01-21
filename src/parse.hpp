@@ -6,12 +6,22 @@
 #include "common.hpp"
 #include "tokenize.hpp"
 
-struct ExpectedFoundError {
-    TokenKind expected;
-    Token found;
+struct ParseError {
+    struct ExpectedFound {
+        TokenKind expected;
+        TokenKind found;
+    };
+    enum class Number {
+        OutOfRange,
+        Invalid,
+    };
+
+    ParseError(ExpectedFound kind, Span span);
+    ParseError(Number kind, Span span);
+
+    std::variant<ExpectedFound, Number> kind;
+    Span span;
 };
-struct ParseNumberError {};
-using ParseExprError = std::variant<ExpectedFoundError, ParseNumberError>;
 
 // expr ::= binary | number
 // binary ::= operator expr expr | number
@@ -20,10 +30,11 @@ struct Parser {
     /// @param tokens Enforcing move here to avoid accidental copying.
     Parser(vector<Token>&& tokens, string_view source);
 
-    auto parse_expr() -> std::expected<unique_ptr<Expr>, ParseExprError>;
-    auto parse_number(Span span) -> std::expected<double, ParseNumberError>;
+    auto parse_expr() -> std::expected<unique_ptr<Expr>, ParseError>;
+    auto parse_number(Span span) -> std::expected<double, ParseError::Number>;
 
-    auto expect(TokenKind kind) -> std::expected<Token, ExpectedFoundError>;
+    auto expect(TokenKind kind)
+        -> std::expected<Token, ParseError::ExpectedFound>;
     auto next() -> const Token&;
 
    private:

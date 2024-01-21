@@ -5,14 +5,14 @@
 
 #include "common.hpp"
 
-string Span::debug() {
+string Span::debug() const {
     string_stream stream;
     // stream << "Span { start: " << start << ", len: " << len << " }";
     stream << start << ".." << start + len;
     return stream.str();
 }
 
-string_view Span::source(string_view source) {
+string_view Span::source(string_view source) const {
     assert(start >= 0);
     assert(len > 0);
     return source.substr(start, len);
@@ -35,8 +35,8 @@ string_view Token::name() {
         case TokenKind::EndOfFile:
             return "EndOfFile";
     }
-    // Unreachable
-    abort();
+
+    panic("unreachable");
 }
 
 string_view Token::src(string_view src) { return span.source(src); }

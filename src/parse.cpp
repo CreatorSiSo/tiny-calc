@@ -26,52 +26,60 @@ static auto kind_to_operator(TokenKind kind) -> std::optional<BinaryOp> {
     }
 }
 
+ParseError::ParseError(ParseError::ExpectedFound error, Span span)
+    : kind(error), span(span) {}
+ParseError::ParseError(ParseError::Number error, Span span)
+    : kind(error), span(span) {}
+
 /// @brief Parses tokens into an ast of expressions, mutates Parser.
 /// @return Pointer to an upcasted expression tree.
-auto Parser::parse_expr() -> std::expected<unique_ptr<Expr>, ParseExprError> {
+auto Parser::parse_expr() -> std::expected<unique_ptr<Expr>, ParseError> {
     auto token = next();
 
     if (token.kind == TokenKind::Number) {
-        if (const auto inner = parse_number(token.span); inner.has_value()) {
-            return unique_ptr<Expr>(new Number(*inner));
-        }
-        // TODO
-        return nullptr;
+        const auto result = parse_number(token.span);
+        if (result.has_value())
+            return unique_ptr<Expr>(new Number(*result));
+        else
+            return std::unexpected(ParseError(result.error(), token.span));
     }
 
     if (const auto op = kind_to_operator(token.kind); op.has_value()) {
         auto lhs = parse_expr();
-        if (!lhs.has_value()) {
-            return std::unexpected(lhs.error());
-        }
+        if (!lhs.has_value()) return std::unexpected(lhs.error());
         auto rhs = parse_expr();
-        if (!rhs.has_value()) {
-            return std::unexpected(rhs.error());
-        }
+        if (!rhs.has_value()) return std::unexpected(rhs.error());
+
         return unique_ptr<Expr>(
             new BinaryExpr(*op, std::move(*lhs), std::move(*rhs)));
     }
 
     // TODO What should be done here?
-    abort();
+    panic("Todo");
 }
 
 auto Parser::parse_number(Span span)
-    -> std::expected<double, ParseNumberError> {
+    -> std::expected<double, ParseError::Number> {
     string source;
     for (auto chr : span.source(m_source)) {
         if (chr != '_') source.push_back(chr);
     }
-    return std::stod(source);
+    try {
+        return std::stod(source);
+    } catch (const std::out_of_range& e) {
+        return std::unexpected(ParseError::Number::OutOfRange);
+    } catch (const std::invalid_argument& e) {
+        return std::unexpected(ParseError::Number::Invalid);
+    }
 }
 
 auto Parser::expect(TokenKind expected)
-    -> std::expected<Token, ExpectedFoundError> {
+    -> std::expected<Token, ParseError::ExpectedFound> {
     const Token& token = next();
     if (token.kind != expected) {
-        return std::unexpected(ExpectedFoundError{
+        return std::unexpected(ParseError::ExpectedFound{
             .expected = expected,
-            .found = token,
+            .found = token.kind,
         });
     }
     return token;

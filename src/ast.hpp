@@ -2,9 +2,13 @@
 
 #include "common.hpp"
 
+struct Number;
+struct BinaryExpr;
+
 struct Expr {
     virtual ~Expr();
-    virtual string display() const = 0;
+    virtual auto display() const -> string = 0;
+    virtual auto downcast() -> std::variant<BinaryExpr*, Number*>;
 };
 
 template <>
@@ -18,9 +22,10 @@ struct std::formatter<Expr> {
 
 struct Number : Expr {
     Number(double value);
-    static unique_ptr<Expr> alloc(double value);
+    static auto alloc(double value) -> unique_ptr<Expr>;
 
-    string display() const override;
+    auto display() const -> string override;
+    auto downcast() -> std::variant<BinaryExpr*, Number*> override;
 
    private:
     double m_value;
@@ -36,10 +41,11 @@ enum class BinaryOp {
 
 struct BinaryExpr : Expr {
     BinaryExpr(BinaryOp op, unique_ptr<Expr> lhs, unique_ptr<Expr> rhs);
-    static unique_ptr<Expr> alloc(BinaryOp op, unique_ptr<Expr> lhs,
-                                  unique_ptr<Expr> rhs);
+    static auto alloc(BinaryOp op, unique_ptr<Expr> lhs, unique_ptr<Expr> rhs)
+        -> unique_ptr<Expr>;
 
-    string display() const override;
+    auto display() const -> string override;
+    auto downcast() -> std::variant<BinaryExpr*, Number*> override;
 
    private:
     BinaryOp m_op;

@@ -3,8 +3,14 @@
 
 #include "ast.hpp"
 #include "common.hpp"
+#include "interpret.hpp"
 #include "parse.hpp"
 #include "tokenize.hpp"
+
+struct Config {
+    bool print_tokens;
+    bool print_ast;
+};
 
 static void write_help(ostream& out) {
     write(out,
@@ -13,11 +19,6 @@ static void write_help(ostream& out) {
           ":tokens  Toggle printing the tokens\n"
           ":ast     Toggle printing the ast\n");
 }
-
-struct Config {
-    bool print_tokens;
-    bool print_ast;
-};
 
 static void run_command(string_view name, Config& config, ostream& out) {
     if (name == "help")
@@ -34,10 +35,25 @@ static void run_command(string_view name, Config& config, ostream& out) {
     }
 }
 
+static void write_parse_error(const ParseError& error, ostream& out) {
+    if (auto kind = std::get_if<ParseError::Number>(&error.kind)) {
+        auto msg = *kind == ParseError::Number::Invalid
+                       ? "Number literal invalid"
+                       : "Number literal too large";
+        writeln(out, "Error: {} at {}", msg, error.span.debug());
+        // TODO Only write this note when appropriate
+        writeln(out, "Note: {} is the maximum",
+                std::numeric_limits<double>::max());
+    } else {
+        writeln(out, "Error: Unable to parse something {}", error.span.debug());
+    }
+}
+
 enum class InputEnd {
     Newline,
     Eof,
 };
+
 static InputEnd get_input(istream& in, string& line) {
     line.clear();
 
@@ -85,16 +101,18 @@ int main() {
             }
         }
 
-        auto ast = Parser(std::move(tokens), line).parse_expr();
-        if (!ast.has_value()) {
-            writeln(out, "Error: while parsing");
-            return -1;
+        auto parse_result = Parser(std::move(tokens), line).parse_expr();
+        if (!parse_result.has_value()) {
+            const auto& error = parse_result.error();
+            write_parse_error(error, out);
+            continue;
         }
         if (config.print_ast) {
             writeln(out, "Ast:");
-            writeln(out, "{}{}", indent, **ast);
+            writeln(out, "{}{}", indent, **parse_result);
         }
 
+        auto eval_result = eval_expr(std::move(*parse_result));
         // TODO eval
     }
 }
