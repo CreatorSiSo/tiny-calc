@@ -59,9 +59,9 @@ void write_report(ostream& out, string_view input, Report report) {
     // TODO calculate column
 
     writeln(out, "{}: {}", Report::kind_to_string(report.kind), report.message);
-    writeln(out, "  ╭──[repl:{}:{}]", line, 0);
-    writeln(out, "  │  {}", input);
-    writeln(out, "──╯  {}", underlines);
+    writeln(out, " ╭──[repl:{}:{}]", line, 0);
+    writeln(out, " │  {}", input);
+    writeln(out, "─╯  {}", underlines);
 
     for (auto& comment : report.comments) {
         writeln(out, "{}: {}", Report::kind_to_string(comment.first),

@@ -16,8 +16,8 @@ static void write_help(ostream& out) {
     write(out,
           ":help     Print command help\n"
           ":quit     Exit calculator (or press CTRL+C)\n"
-          ":tokens   Toggle printing the tokens\n"
-          ":opcodes  Toggle printing the op-codes\n");
+          ":tokens   Toggle printing token streams\n"
+          ":chunks   Toggle printing compiled chunks\n");
 }
 
 static void run_command(string_view name, Config& config, ostream& out) {
