@@ -2,7 +2,7 @@
 
 #include <expected>
 
-#include "ast.hpp"
+#include "chunk.hpp"
 #include "common.hpp"
 #include "tokenize.hpp"
 
@@ -28,17 +28,22 @@ struct ParseError {
 // number ::= digit (digit | "_")* ("." (digit | "_")*)?
 struct Parser {
     /// @param tokens Enforcing move here to avoid accidental copying.
+    static auto parse(vector<Token>&& tokens, string_view source)
+        -> std::expected<Chunk, ParseError>;
+
+   private:
     Parser(vector<Token>&& tokens, string_view source);
 
-    auto parse_expr() -> std::expected<unique_ptr<Expr>, ParseError>;
+    auto parse_expr() -> std::optional<ParseError>;
     auto parse_number(Span span) -> std::expected<double, ParseError::Number>;
 
     auto expect(TokenKind kind)
         -> std::expected<Token, ParseError::ExpectedFound>;
     auto next() -> const Token&;
 
-   private:
     size_t m_current;
     vector<Token> m_tokens;
     string_view m_source;
+    vector<OpCode> m_op_codes;
+    vector<double> m_literals;
 };

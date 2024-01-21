@@ -1,5 +1,14 @@
 #include "parse.hpp"
 
+auto Parser::parse(vector<Token>&& tokens, string_view source)
+    -> std::expected<Chunk, ParseError> {
+    Parser parser(std::move(tokens), source);
+    if (auto err = parser.parse_expr(); err.has_value()) {
+        return std::unexpected(*err);
+    }
+    return Chunk(std::move(parser.m_op_codes), std::move(parser.m_literals));
+}
+
 Parser::Parser(vector<Token>&& tokens, string_view source)
     : m_current(0), m_tokens(tokens), m_source(source) {
     // Insert end of file token
@@ -11,16 +20,16 @@ Parser::Parser(vector<Token>&& tokens, string_view source)
     m_tokens.push_back(Token(TokenKind::EndOfFile, Span(end, 0)));
 }
 
-static auto kind_to_operator(TokenKind kind) -> std::optional<BinaryOp> {
+static auto kind_to_op_code(TokenKind kind) -> std::optional<OpCode> {
     switch (kind) {
         case TokenKind::Plus:
-            return BinaryOp::Add;
+            return OpCode::Add;
         case TokenKind::Minus:
-            return BinaryOp::Sub;
+            return OpCode::Sub;
         case TokenKind::Star:
-            return BinaryOp::Mul;
+            return OpCode::Mul;
         case TokenKind::Slash:
-            return BinaryOp::Div;
+            return OpCode::Div;
         default:
             return {};
     }
@@ -33,25 +42,27 @@ ParseError::ParseError(ParseError::Number error, Span span)
 
 /// @brief Parses tokens into an ast of expressions, mutates Parser.
 /// @return Pointer to an upcasted expression tree.
-auto Parser::parse_expr() -> std::expected<unique_ptr<Expr>, ParseError> {
-    auto token = next();
+auto Parser::parse_expr() -> std::optional<ParseError> {
+    const Token& token = next();
 
     if (token.kind == TokenKind::Number) {
         const auto result = parse_number(token.span);
-        if (result.has_value())
-            return unique_ptr<Expr>(new Number(*result));
-        else
-            return std::unexpected(ParseError(result.error(), token.span));
+        if (result.has_value()) {
+            m_op_codes.push_back(OpCode::Literal);
+            m_literals.push_back(*result);
+            return {};
+        }
+        return ParseError(result.error(), token.span);
     }
 
-    if (const auto op = kind_to_operator(token.kind); op.has_value()) {
-        auto lhs = parse_expr();
-        if (!lhs.has_value()) return std::unexpected(lhs.error());
-        auto rhs = parse_expr();
-        if (!rhs.has_value()) return std::unexpected(rhs.error());
+    if (const auto op_code = kind_to_op_code(token.kind); op_code.has_value()) {
+        const auto err_lhs = parse_expr();
+        if (err_lhs.has_value()) return err_lhs;
+        const auto err_rhs = parse_expr();
+        if (err_rhs.has_value()) return err_rhs;
 
-        return unique_ptr<Expr>(
-            new BinaryExpr(*op, std::move(*lhs), std::move(*rhs)));
+        m_op_codes.push_back(*op_code);
+        return {};
     }
 
     // TODO What should be done here?

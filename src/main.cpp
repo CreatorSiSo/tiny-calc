@@ -1,7 +1,6 @@
 #include <cctype>
 #include <iostream>
 
-#include "ast.hpp"
 #include "common.hpp"
 #include "interpret.hpp"
 #include "parse.hpp"
@@ -9,15 +8,15 @@
 
 struct Config {
     bool print_tokens;
-    bool print_ast;
+    bool print_opcodes;
 };
 
 static void write_help(ostream& out) {
     write(out,
-          ":help    Print command help\n"
-          ":quit    Exit calculator (or press CTRL+C)\n"
-          ":tokens  Toggle printing the tokens\n"
-          ":ast     Toggle printing the ast\n");
+          ":help     Print command help\n"
+          ":quit     Exit calculator (or press CTRL+C)\n"
+          ":tokens   Toggle printing the tokens\n"
+          ":opcodes  Toggle printing the op-codes\n");
 }
 
 static void run_command(string_view name, Config& config, ostream& out) {
@@ -25,8 +24,8 @@ static void run_command(string_view name, Config& config, ostream& out) {
         write_help(out);
     else if (name == "tokens")
         config.print_tokens = !config.print_tokens;
-    else if (name == "ast")
-        config.print_ast = !config.print_ast;
+    else if (name == "opcodes")
+        config.print_opcodes = !config.print_opcodes;
     else if (name == "quit")
         exit(0);
     else {
@@ -74,7 +73,7 @@ int main() {
     constexpr auto indent = "    ";
     Config config{
         .print_tokens = true,
-        .print_ast = true,
+        .print_opcodes = true,
     };
     string line;
 
@@ -101,18 +100,25 @@ int main() {
             }
         }
 
-        auto parse_result = Parser(std::move(tokens), line).parse_expr();
+        auto parse_result = Parser::parse(std::move(tokens), line);
         if (!parse_result.has_value()) {
             const auto& error = parse_result.error();
             write_parse_error(error, out);
             continue;
         }
-        if (config.print_ast) {
-            writeln(out, "Ast:");
-            writeln(out, "{}{}", indent, **parse_result);
+        if (config.print_opcodes) {
+            const auto& chunk = *parse_result;
+            writeln(out, "Op Codes:");
+            for (auto opcode : chunk.op_codes()) {
+                writeln(out, "{}{}", indent, static_cast<uint8_t>(opcode));
+            }
+            writeln(out, "Literals:");
+            for (size_t i = 0; i < chunk.literals().size(); i += 1) {
+                writeln(out, "{}[{}] {}", indent, i, chunk.literals()[i]);
+            }
         }
 
-        auto eval_result = eval_expr(std::move(*parse_result));
+        auto eval_result = interpret(std::move(*parse_result));
         // TODO eval
     }
 }
