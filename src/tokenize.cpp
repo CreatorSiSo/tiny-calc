@@ -5,20 +5,17 @@
 
 #include "common.hpp"
 
-string Span::debug() const {
-    string_stream stream;
-    // stream << "Span { start: " << start << ", len: " << len << " }";
-    stream << start << ".." << start + len;
-    return stream.str();
+auto Span::debug() const -> string {
+    return std::format("{}..{}", start, start + len);
 }
 
-string_view Span::source(string_view source) const {
+auto Span::source(string_view source) const -> string_view {
     assert(start >= 0);
     assert(len > 0);
     return source.substr(start, len);
 }
 
-string_view Token::name() {
+auto Token::name() const -> string_view {
     switch (kind) {
         case TokenKind::Plus:
             return "Plus";
@@ -39,13 +36,15 @@ string_view Token::name() {
     panic("unreachable");
 }
 
-string_view Token::src(string_view src) { return span.source(src); }
+auto Token::src(string_view src) const -> string_view {
+    return span.source(src);
+}
 
-string Token::debug(string_view src) {
+auto Token::debug(string_view src) const -> string {
     return std::format("{}[{}] {}", name(), this->src(src), span.debug());
 }
 
-static size_t validate_whitespace(string_view str) {
+static auto validate_whitespace(string_view str) -> size_t {
     size_t len = 0;
     for (char chr : str) {
         if (!std::isspace(chr)) break;
@@ -54,7 +53,7 @@ static size_t validate_whitespace(string_view str) {
     return len;
 }
 
-static size_t validate_number(string_view str) {
+static auto validate_number(string_view str) -> size_t {
     if (!std::isdigit(str.at(0))) return 0;
 
     size_t len = 1;
@@ -83,9 +82,10 @@ static size_t validate_number(string_view str) {
     return len;
 }
 
-vector<Token> tokenize(string_view str) {
+auto tokenize(string_view str) -> std::pair<vector<Token>, bool> {
     vector<Token> tokens;
     size_t start = 0;
+    bool contains_error = false;
 
     auto push = [&tokens](TokenKind kind, Span span) {
         tokens.push_back(Token(kind, span));
@@ -123,11 +123,12 @@ vector<Token> tokenize(string_view str) {
                 push(TokenKind::Slash, Span(start, 1));
                 break;
             default:
+                contains_error = true;
                 push(TokenKind::Error, Span(start, 1));
                 break;
         }
         start += 1;
     }
 
-    return tokens;
+    return std::make_pair(tokens, contains_error);
 }

@@ -92,15 +92,21 @@ int main() {
             continue;
         }
 
-        auto tokens = tokenize(line);
+        auto tokenize_result = tokenize(line);
         if (config.print_tokens) {
             writeln(out, "Tokens:");
-            for (auto token : tokens) {
+            for (const auto& token : tokenize_result.first) {
                 writeln(out, "{}{}", indent, token.debug(line));
             }
         }
+        if (tokenize_result.second) {
+            // TODO Print errors
+            // Error while tokenizing
+            continue;
+        }
 
-        auto parse_result = Compiler::compile(std::move(tokens), line);
+        auto parse_result =
+            Compiler::compile(std::move(tokenize_result.first), line);
         if (!parse_result.has_value()) {
             const auto& error = parse_result.error();
             write_parse_error(error, out);
