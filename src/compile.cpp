@@ -1,10 +1,10 @@
 #include "compile.hpp"
 
 auto Compiler::compile(vector<Token>&& tokens, string_view source)
-    -> std::expected<Chunk, ParseError> {
+    -> std::expected<Chunk, Report> {
     Compiler parser(std::move(tokens), source);
-    if (auto err = parser.parse_expr(); err.has_value()) {
-        return std::unexpected(*err);
+    if (const auto report = parser.parse_expr(); report.has_value()) {
+        return std::unexpected(*report);
     }
     return Chunk(std::move(parser.m_op_codes), std::move(parser.m_literals));
 }
@@ -17,7 +17,7 @@ Compiler::Compiler(vector<Token>&& tokens, string_view source)
         Span last_span = m_tokens.back().span;
         end = last_span.start + last_span.len;
     }
-    m_tokens.push_back(Token(TokenKind::EndOfFile, Span(end, 0)));
+    m_tokens.push_back(Token(TokenKind::EndOfInput, Span(end, 0)));
 }
 
 static auto kind_to_op_code(TokenKind kind) -> std::optional<OpCode> {
@@ -35,14 +35,9 @@ static auto kind_to_op_code(TokenKind kind) -> std::optional<OpCode> {
     }
 }
 
-ParseError::ParseError(ParseError::ExpectedFound error, Span span)
-    : kind(error), span(span) {}
-ParseError::ParseError(ParseError::Number error, Span span)
-    : kind(error), span(span) {}
-
 /// @brief Parses tokens into an ast of expressions, mutates Parser.
 /// @return Pointer to an upcasted expression tree.
-auto Compiler::parse_expr() -> std::optional<ParseError> {
+auto Compiler::parse_expr() -> std::optional<Report> {
     const Token& token = next();
 
     if (token.kind == TokenKind::Number) {
@@ -52,7 +47,7 @@ auto Compiler::parse_expr() -> std::optional<ParseError> {
             m_literals.push_back(*result);
             return {};
         }
-        return ParseError(result.error(), token.span);
+        return result.error();
     }
 
     if (const auto op_code = kind_to_op_code(token.kind); op_code.has_value()) {
@@ -65,12 +60,12 @@ auto Compiler::parse_expr() -> std::optional<ParseError> {
         return {};
     }
 
-    // TODO Return error: Expected expression found {token}
-    panic("Todo");
+    return Report(ReportKind::Error,
+                  std::format("Expected expression found <{}>", token.name()),
+                  {token.span});
 }
 
-auto Compiler::parse_number(Span span)
-    -> std::expected<double, ParseError::Number> {
+auto Compiler::parse_number(Span span) -> std::expected<double, Report> {
     string source;
     for (auto chr : span.source(m_source)) {
         if (chr != '_') source.push_back(chr);
@@ -78,22 +73,15 @@ auto Compiler::parse_number(Span span)
     try {
         return std::stod(source);
     } catch (const std::out_of_range& e) {
-        return std::unexpected(ParseError::Number::OutOfRange);
+        return std::unexpected(
+            Report(ReportKind::Error, "Number literal too large", {span}));
+        // TODO Add note
+        // writeln(out, "Note: {} is the maximum",
+        //         std::numeric_limits<double>::max());
     } catch (const std::invalid_argument& e) {
-        return std::unexpected(ParseError::Number::Invalid);
+        return std::unexpected(
+            Report(ReportKind::Error, "Number literal invalid", {span}));
     }
-}
-
-auto Compiler::expect(TokenKind expected)
-    -> std::expected<Token, ParseError::ExpectedFound> {
-    const Token& token = next();
-    if (token.kind != expected) {
-        return std::unexpected(ParseError::ExpectedFound{
-            .expected = expected,
-            .found = token.kind,
-        });
-    }
-    return token;
 }
 
 auto Compiler::next() -> const Token& {

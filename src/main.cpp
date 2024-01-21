@@ -35,20 +35,6 @@ static void run_command(string_view name, Config& config, ostream& out) {
     }
 }
 
-static void write_parse_error(const ParseError& error, ostream& out) {
-    if (auto kind = std::get_if<ParseError::Number>(&error.kind)) {
-        auto msg = *kind == ParseError::Number::Invalid
-                       ? "Number literal invalid"
-                       : "Number literal too large";
-        writeln(out, "Error: {} at {}", msg, error.span.debug());
-        // TODO Only write this note when appropriate
-        writeln(out, "Note: {} is the maximum",
-                std::numeric_limits<double>::max());
-    } else {
-        writeln(out, "Error: Unable to parse something {}", error.span.debug());
-    }
-}
-
 enum class InputEnd {
     Newline,
     Eof,
@@ -110,7 +96,8 @@ int main() {
             if (!error_spans.empty()) {
                 string message =
                     error_spans.size() > 1 ? "Invalid Tokens" : "Invalid Token";
-                write_report(out, line, Report(message, error_spans));
+                write_report(out, line,
+                             Report(ReportKind::Error, message, error_spans));
                 continue;
             }
         }
@@ -118,8 +105,8 @@ int main() {
         auto maybe_chunk = Compiler::compile(std::move(tokens), line);
         {
             if (!maybe_chunk.has_value()) {
-                const auto& error = maybe_chunk.error();
-                write_parse_error(error, out);
+                const auto& report = maybe_chunk.error();
+                write_report(out, line, report);
                 continue;
             }
             if (config.print_chunks) {

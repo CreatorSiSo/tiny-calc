@@ -16,8 +16,8 @@ auto Token::name() const -> string_view {
             return "Number";
         case TokenKind::Error:
             return "Error";
-        case TokenKind::EndOfFile:
-            return "EndOfFile";
+        case TokenKind::EndOfInput:
+            return "EndOfInput";
     }
 
     panic("unreachable");

@@ -10,7 +10,7 @@ enum class TokenKind {
     Slash,
     Number,
     Error,
-    EndOfFile,
+    EndOfInput,
 };
 
 struct Token {

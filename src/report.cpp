@@ -10,9 +10,18 @@ auto Span::debug() const -> string {
 
 auto Span::source(string_view source) const -> string_view {
     assert(start >= 0);
-    assert(len > 0);
     return source.substr(start, len);
 }
+
+Report::Report(ReportKind kind, string message)
+    : kind(kind), message(message) {}
+
+Report::Report(ReportKind kind, string message, vector<Span> spans)
+    : kind(kind), message(message), spans(spans) {}
+
+Report::Report(ReportKind kind, string message, vector<Span> spans,
+               vector<std::pair<ReportKind, string>> notes)
+    : kind(kind), message(message), spans(spans), comments(notes) {}
 
 static auto repeat(string_view value, uint32_t amount) -> string {
     string result;
@@ -20,6 +29,17 @@ static auto repeat(string_view value, uint32_t amount) -> string {
         result.append(value);
     }
     return result;
+}
+
+auto Report::kind_to_string(ReportKind kind) -> string_view {
+    switch (kind) {
+        case ReportKind::Error:
+            return "Error";
+        case ReportKind::Note:
+            return "Note";
+        default:
+            panic("Case not covered");
+    }
 }
 
 void write_report(ostream& out, string_view input, Report report) {
@@ -38,8 +58,13 @@ void write_report(ostream& out, string_view input, Report report) {
     }
     // TODO calculate column
 
-    writeln(out, "Error: {}", report.message);
+    writeln(out, "{}: {}", Report::kind_to_string(report.kind), report.message);
     writeln(out, "  ╭──[repl:{}:{}]", line, 0);
     writeln(out, "  │  {}", input);
     writeln(out, "──╯  {}", underlines);
+
+    for (auto& comment : report.comments) {
+        writeln(out, "{}: {}", Report::kind_to_string(comment.first),
+                comment.second);
+    }
 }
