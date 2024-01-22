@@ -20,9 +20,9 @@ auto Token::name() const -> string_view {
             return "Error";
         case TokenKind::EndOfInput:
             return "EndOfInput";
+        default:
+            panic("Case <{}> not covered", (uint8_t)kind);
     }
-
-    panic("unreachable");
 }
 
 auto Token::src(string_view src) const -> string_view {
@@ -73,6 +73,7 @@ static auto validate_number(string_view str) -> size_t {
 
 auto tokenize(string_view str) -> vector<Token> {
     vector<Token> tokens;
+    // First character index of current token
     size_t start = 0;
 
     auto push = [&tokens](TokenKind kind, Span span) {
