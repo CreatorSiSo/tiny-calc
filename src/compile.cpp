@@ -4,13 +4,20 @@
 
 auto Compiler::compile(vector<Token>&& tokens, string_view source)
     -> std::expected<Chunk, Report> {
-    Compiler parser(std::move(tokens), source);
-    if (const auto report = parser.compile_expr(); report.has_value()) {
+    Compiler compiler(std::move(tokens), source);
+    if (const auto report = compiler.compile_expr(); report.has_value()) {
         return std::unexpected(*report);
     }
-    std::reverse(parser.m_op_codes.begin(), parser.m_op_codes.end());
-    std::reverse(parser.m_literals.begin(), parser.m_literals.end());
-    return Chunk(std::move(parser.m_op_codes), std::move(parser.m_literals));
+    if (auto& token = compiler.next(); token.kind != TokenKind::EndOfInput) {
+        return std::unexpected(Report(
+            ReportKind::Error,
+            std::format("Excpected <EndOfInput> found <{}>", token.name()),
+            {token.span}));
+    }
+    std::reverse(compiler.m_op_codes.begin(), compiler.m_op_codes.end());
+    std::reverse(compiler.m_literals.begin(), compiler.m_literals.end());
+    return Chunk(std::move(compiler.m_op_codes),
+                 std::move(compiler.m_literals));
 }
 
 Compiler::Compiler(vector<Token>&& tokens, string_view source)
