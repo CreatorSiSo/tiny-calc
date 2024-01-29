@@ -20,8 +20,10 @@ enum class ReportKind {
 struct Report {
     Report(ReportKind kind, string message);
     Report(ReportKind kind, string message, vector<Span> spans);
-    Report(ReportKind kind, string message, vector<Span> spans,
-           vector<std::pair<ReportKind, string>> notes);
+    Report(
+        ReportKind kind, string message, vector<Span> spans,
+        vector<std::pair<ReportKind, string>> notes
+    );
 
     static auto kind_to_string(ReportKind kind) -> string_view;
 

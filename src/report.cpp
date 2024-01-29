@@ -19,8 +19,10 @@ Report::Report(ReportKind kind, string message)
 Report::Report(ReportKind kind, string message, vector<Span> spans)
     : kind(kind), message(message), spans(spans) {}
 
-Report::Report(ReportKind kind, string message, vector<Span> spans,
-               vector<std::pair<ReportKind, string>> notes)
+Report::Report(
+    ReportKind kind, string message, vector<Span> spans,
+    vector<std::pair<ReportKind, string>> notes
+)
     : kind(kind), message(message), spans(spans), comments(notes) {}
 
 static auto repeat(string_view value, uint32_t amount) -> string {
@@ -48,8 +50,9 @@ void write_report(ostream& out, string_view input, Report report) {
     string underlines(input.size(), ' ');
     for (Span span : report.spans) {
         if (span.start > start) start = span.start;
-        underlines.replace(span.start, span.len,
-                           repeat("^", std::max(span.len, (size_t)1)));
+        underlines.replace(
+            span.start, span.len, repeat("^", std::max(span.len, (size_t)1))
+        );
     }
 
     size_t line = 1;
@@ -64,7 +67,8 @@ void write_report(ostream& out, string_view input, Report report) {
     writeln(out, "─╯  {}", underlines);
 
     for (auto& comment : report.comments) {
-        writeln(out, "{}: {}", Report::kind_to_string(comment.first),
-                comment.second);
+        writeln(
+            out, "{}: {}", Report::kind_to_string(comment.first), comment.second
+        );
     }
 }

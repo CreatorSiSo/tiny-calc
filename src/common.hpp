@@ -18,14 +18,16 @@ using ostream = std::ostream;
 using istream = std::istream;
 
 template <typename... Args>
-inline void write(ostream& out, std::format_string<Args&...> fmt,
-                  Args&&... args) {
+inline void write(
+    ostream& out, std::format_string<Args&...> fmt, Args&&... args
+) {
     out << std::format(fmt, args...);
 }
 
 template <typename... Args>
-inline void writeln(ostream& out, std::format_string<Args&...> fmt,
-                    Args&&... args) {
+inline void writeln(
+    ostream& out, std::format_string<Args&...> fmt, Args&&... args
+) {
     out << std::format(fmt, args...) << "\n";
 }
 
@@ -34,8 +36,8 @@ template <typename... Args>
 struct PanicFormat {
     template <class T>
     consteval PanicFormat(
-        const T& s,
-        std::source_location loc = std::source_location::current()) noexcept
+        const T& s, std::source_location loc = std::source_location::current()
+    ) noexcept
         : fmt{s}, loc{loc} {}
 
     std::format_string<Args...> fmt;
@@ -47,10 +49,13 @@ struct PanicFormat {
 /// @param fmt Format string to inserted arguments into.
 /// @param ...args The arguments inserted into `fmt`.
 template <typename... Args>
-[[noreturn]] inline void panic(PanicFormat<std::type_identity_t<Args>...> fmt,
-                               Args&&... args) {
+[[noreturn]] inline void panic(
+    PanicFormat<std::type_identity_t<Args>...> fmt, Args&&... args
+) {
     auto msg = std::format(fmt.fmt, std::forward<Args>(args)...);
-    writeln(std::cerr, "panicked at {}:{}:{}: {}", fmt.loc.file_name(),
-            fmt.loc.line(), fmt.loc.column(), msg);
+    writeln(
+        std::cerr, "panicked at {}:{}:{}: {}", fmt.loc.file_name(),
+        fmt.loc.line(), fmt.loc.column(), msg
+    );
     abort();
 }

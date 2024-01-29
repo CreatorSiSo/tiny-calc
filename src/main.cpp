@@ -13,11 +13,13 @@ struct Config {
 };
 
 static void write_help(ostream& out) {
-    write(out,
-          ":help     Print command help\n"
-          ":quit     Exit calculator (or press CTRL+C)\n"
-          ":tokens   Toggle printing token streams\n"
-          ":chunks   Toggle printing compiled chunks\n");
+    write(
+        out,
+        ":help     Print command help\n"
+        ":quit     Exit calculator (or press CTRL+C)\n"
+        ":tokens   Toggle printing token streams\n"
+        ":chunks   Toggle printing compiled chunks\n"
+    );
 }
 
 static void run_command(string_view name, Config& config, ostream& out) {
@@ -96,8 +98,9 @@ int main() {
             if (!error_spans.empty()) {
                 string message =
                     error_spans.size() > 1 ? "Invalid Tokens" : "Invalid Token";
-                write_report(out, line,
-                             Report(ReportKind::Error, message, error_spans));
+                write_report(
+                    out, line, Report(ReportKind::Error, message, error_spans)
+                );
                 continue;
             }
         }
@@ -115,8 +118,10 @@ int main() {
 
                 writeln(out, "OpCodes:");
                 for (size_t i = 0; i < op_codes.size(); i += 1) {
-                    writeln(out, "{}[{}] {}", indent, i,
-                            op_code_to_string(op_codes[i]));
+                    writeln(
+                        out, "{}[{}] {}", indent, i,
+                        op_code_to_string(op_codes[i])
+                    );
                 }
                 writeln(out, "Literals:");
                 for (size_t i = 0; i < literals.size(); i += 1) {

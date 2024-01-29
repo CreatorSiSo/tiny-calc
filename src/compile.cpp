@@ -12,12 +12,14 @@ auto Compiler::compile(vector<Token>&& tokens, string_view source)
         return std::unexpected(Report(
             ReportKind::Error,
             std::format("Excpected <EndOfInput> found <{}>", token.name()),
-            {token.span}));
+            {token.span}
+        ));
     }
     std::reverse(compiler.m_op_codes.begin(), compiler.m_op_codes.end());
     std::reverse(compiler.m_literals.begin(), compiler.m_literals.end());
-    return Chunk(std::move(compiler.m_op_codes),
-                 std::move(compiler.m_literals));
+    return Chunk(
+        std::move(compiler.m_op_codes), std::move(compiler.m_literals)
+    );
 }
 
 Compiler::Compiler(vector<Token>&& tokens, string_view source)
