@@ -59,9 +59,7 @@ static auto parse_number(Span span, string_view source)
     } catch (const std::out_of_range& e) {
         auto note = std::make_pair(
             ReportKind::Note,
-            std::format(
-                "Note: {} is the maximum", std::numeric_limits<double>::max()
-            )
+            std::format("{} is the maximum", std::numeric_limits<double>::max())
         );
         return std::unexpected(Report(
             ReportKind::Error, "Number literal too large", {span}, {note}
@@ -79,7 +77,7 @@ auto Compiler::compile_expr() -> std::optional<Report> {
     const Token& token = next();
 
     if (token.kind == TokenKind::Number) {
-        const auto result = parse_number(token.span);
+        const auto result = parse_number(token.span, m_source);
         if (result.has_value()) {
             m_op_codes.push_back(OpCode::Literal);
             m_literals.push_back(*result);

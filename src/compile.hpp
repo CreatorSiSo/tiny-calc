@@ -18,7 +18,6 @@ struct Compiler {
     Compiler(vector<Token>&& tokens, string_view source);
 
     auto compile_expr() -> std::optional<Report>;
-    auto parse_number(Span span) -> std::expected<double, Report>;
 
     auto next() -> const Token&;
 
