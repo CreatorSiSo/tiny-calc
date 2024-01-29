@@ -46,6 +46,31 @@ static auto kind_to_binary_op(TokenKind kind) -> std::optional<OpCode> {
     }
 }
 
+static auto parse_number(Span span, string_view source)
+    -> std::expected<double, Report> {
+    string number_string;
+    for (auto chr : span.source(source)) {
+        if (chr != '_') number_string.push_back(chr);
+    }
+    try {
+        return std::stod(number_string);
+    } catch (const std::out_of_range& e) {
+        auto note = std::make_pair(
+            ReportKind::Note,
+            std::format(
+                "Note: {} is the maximum", std::numeric_limits<double>::max()
+            )
+        );
+        return std::unexpected(Report(
+            ReportKind::Error, "Number literal too large", {span}, {note}
+        ));
+    } catch (const std::invalid_argument& e) {
+        return std::unexpected(
+            Report(ReportKind::Error, "Number literal invalid", {span})
+        );
+    }
+}
+
 /// @brief Parses tokens into an ast of expressions, mutates Parser.
 /// @return Pointer to an upcasted expression tree.
 auto Compiler::compile_expr() -> std::optional<Report> {
@@ -61,11 +86,19 @@ auto Compiler::compile_expr() -> std::optional<Report> {
         return result.error();
     }
 
-    if (token.kind == TokenKind::C) {
-        m_op_codes.push_back(OpCode::Cos);
+    if (token.kind == TokenKind::Ident) {
+        string_view ident = token.src(m_source);
+        if (ident == "cos" || ident == "c") {
+            m_op_codes.push_back(OpCode::Cos);
+        } else {
+            return Report(
+                ReportKind::Error, std::format("Unknown function <{}>", ident),
+                {token.span}
+            );
+        }
 
-        if (auto err_rhs = compile_expr(); err_rhs.has_value()) return err_rhs;
-
+        auto maybe_error = compile_expr();
+        if (maybe_error.has_value()) return maybe_error;
         return {};
     }
 
@@ -78,28 +111,11 @@ auto Compiler::compile_expr() -> std::optional<Report> {
         return {};
     }
 
-    return Report(ReportKind::Error,
-                  std::format("Expected expression found <{}>", token.name()),
-                  {token.span});
-}
-
-auto Compiler::parse_number(Span span) -> std::expected<double, Report> {
-    string source;
-    for (auto chr : span.source(m_source)) {
-        if (chr != '_') source.push_back(chr);
-    }
-    try {
-        return std::stod(source);
-    } catch (const std::out_of_range& e) {
-        return std::unexpected(
-            Report(ReportKind::Error, "Number literal too large", {span}));
-        // TODO Add note
-        // writeln(out, "Note: {} is the maximum",
-        //         std::numeric_limits<double>::max());
-    } catch (const std::invalid_argument& e) {
-        return std::unexpected(
-            Report(ReportKind::Error, "Number literal invalid", {span}));
-    }
+    return Report(
+        ReportKind::Error,
+        std::format("Expected expression, found <{}>", token.name()),
+        {token.span}
+    );
 }
 
 auto Compiler::next() -> const Token& {

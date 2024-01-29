@@ -4,8 +4,8 @@
 
 auto Token::name() const -> string_view {
     switch (kind) {
-        case TokenKind::C:
-            return "C";
+        case TokenKind::Ident:
+            return "Ident";
         case TokenKind::Plus:
             return "Plus";
         case TokenKind::Minus:
@@ -71,6 +71,17 @@ static auto validate_number(string_view str) -> size_t {
     return len;
 }
 
+static auto validate_identifier(string_view src) -> size_t {
+    size_t len = 0;
+    for (char c : src) {
+        if (std::isalpha(c))
+            len += 1;
+        else
+            break;
+    }
+    return len;
+}
+
 auto tokenize(string_view str) -> vector<Token> {
     vector<Token> tokens;
     // First character index of current token
@@ -84,6 +95,12 @@ auto tokenize(string_view str) -> vector<Token> {
         auto rest = str.substr(start);
         char chr = str.at(start);
 
+        size_t whitespace_len = validate_whitespace(rest);
+        if (whitespace_len > 0) {
+            start += whitespace_len;
+            continue;
+        }
+
         size_t number_len = validate_number(rest);
         if (number_len > 0) {
             push(TokenKind::Number, Span(start, number_len));
@@ -91,17 +108,15 @@ auto tokenize(string_view str) -> vector<Token> {
             continue;
         }
 
-        size_t whitespace_len = validate_whitespace(rest);
-        if (whitespace_len > 0) {
-            start += whitespace_len;
+        size_t identifier_len = validate_identifier(rest);
+        if (identifier_len > 0) {
+            push(TokenKind::Ident, Span(start, identifier_len));
+            start += identifier_len;
             continue;
         }
 
         // Operators
         switch (chr) {
-            case 'c':
-                push(TokenKind::C, Span(start, 1));
-                break;
             case '+':
                 push(TokenKind::Plus, Span(start, 1));
                 break;
