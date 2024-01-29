@@ -9,3 +9,6 @@ alias b := build
 
 @clean:
     rm -rf build/*
+
+@format:
+    clang-format src/*.cpp -i
