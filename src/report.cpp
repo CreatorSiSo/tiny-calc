@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include "utf8.hpp"
+
 Span::Span(size_t start_val, size_t len_val) : start(start_val), len(len_val) {}
 
 auto Span::debug() const -> string {
@@ -46,18 +48,23 @@ auto Report::kind_to_string(ReportKind kind) -> string_view {
 
 void write_report(ostream& out, string_view input, Report report) {
     // largest start of all spans
-    size_t start = 0;
-    string underlines(input.size(), ' ');
+    size_t smallest_start = 0;
+    string underlines = string(input.size(), ' ');
 
     for (Span span : report.spans) {
-        if (span.start > start) start = span.start;
+        if (span.start < smallest_start) smallest_start = span.start;
+
+        size_t width_start =
+            utf8_amount_scalars(Span(0, span.start).source(input));
+        size_t width_span = utf8_amount_scalars(span.source(input));
+
         underlines.replace(
-            span.start, span.len, repeat("^", std::max(span.len, (size_t)1))
+            width_start, span.len, repeat("^", std::max(width_span, (size_t)1))
         );
     }
 
     size_t line = 1;
-    for (char c : input.substr(0, start)) {
+    for (char c : input.substr(0, smallest_start)) {
         if (c == '\n') line += 1;
     }
     // TODO calculate column
