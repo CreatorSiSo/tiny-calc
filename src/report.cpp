@@ -48,6 +48,7 @@ void write_report(ostream& out, string_view input, Report report) {
     // largest start of all spans
     size_t start = 0;
     string underlines(input.size(), ' ');
+
     for (Span span : report.spans) {
         if (span.start > start) start = span.start;
         underlines.replace(

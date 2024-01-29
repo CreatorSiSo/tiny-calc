@@ -1,5 +1,6 @@
 #include <cctype>
 #include <cmath>
+#include <locale>
 
 #include "common.hpp"
 #include "compile.hpp"
