@@ -27,12 +27,12 @@ auto Token::name() const -> string_view {
     }
 }
 
-auto Token::src(string_view src) const -> string_view {
+auto Token::source(string_view src) const -> StringView {
     return span.source(src);
 }
 
 auto Token::debug(string_view src) const -> string {
-    return std::format("{}[{}] {}", name(), this->src(src), span.debug());
+    return std::format("{}[{}] {}", name(), this->source(src), span.debug());
 }
 
 static auto validate_whitespace(string_view str) -> size_t {
@@ -73,21 +73,20 @@ static auto validate_number(string_view str) -> size_t {
     return len;
 }
 
-static constexpr auto validate_identifier(string_view src) -> size_t {
-    size_t ident_length = 0;
+static constexpr auto validate_identifier(string_view source) -> size_t {
+    Chars scalars(source);
+    size_t offset = 0;
 
     while (true) {
-        auto next = utf8_decode_scalar(src.substr(ident_length));
-        uint32_t scalar = next.first;
-        int8_t length = next.second;
-
-        if (length < 0 || std::iswspace(scalar) || std::iswpunct(scalar) ||
-            std::iswdigit(scalar))
+        auto next = scalars.next();
+        if (!next.has_value() || std::iswspace(*next) || std::iswpunct(*next) ||
+            std::iswdigit(*next))
             break;
-        ident_length += length;
+
+        offset = scalars.offset();
     }
 
-    return ident_length;
+    return offset;
 }
 
 auto tokenize(string_view str) -> vector<Token> {

@@ -2,6 +2,7 @@
 
 #include "common.hpp"
 #include "report.hpp"
+#include "utf8.hpp"
 
 enum class TokenKind {
     Ident,
@@ -21,7 +22,7 @@ struct Token {
     Token(TokenKind kind_val, Span span_val) : kind(kind_val), span(span_val) {}
 
     auto name() const -> string_view;
-    auto src(string_view src) const -> string_view;
+    auto source(string_view src) const -> StringView;
     auto debug(string_view src) const -> string;
 };
 

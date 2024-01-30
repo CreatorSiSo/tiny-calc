@@ -2,17 +2,15 @@
 
 #include <cassert>
 
-#include "utf8.hpp"
-
 Span::Span(size_t start_val, size_t len_val) : start(start_val), len(len_val) {}
 
 auto Span::debug() const -> string {
     return std::format("{}..{}", start, start + len);
 }
 
-auto Span::source(string_view source) const -> string_view {
+auto Span::source(string_view source) const -> StringView {
     assert(start >= 0);
-    return source.substr(start, len);
+    return StringView(source.substr(start, len));
 }
 
 Report::Report(ReportKind kind, string message)
@@ -52,14 +50,14 @@ void write_report(ostream& out, string_view input, Report report) {
     string underlines = string(input.size(), ' ');
 
     for (Span span : report.spans) {
-        if (span.start < smallest_start) smallest_start = span.start;
+        auto [start, length] = span;
+        if (start < smallest_start) smallest_start = start;
 
-        size_t width_start =
-            utf8_amount_scalars(Span(0, span.start).source(input));
-        size_t width_span = utf8_amount_scalars(span.source(input));
+        size_t width_start = Span(0, start).source(input).width();
+        size_t width_span = span.source(input).width();
 
         underlines.replace(
-            width_start, span.len, repeat("^", std::max(width_span, (size_t)1))
+            width_start, length, repeat("^", std::max(width_span, (size_t)1))
         );
     }
 
@@ -74,9 +72,7 @@ void write_report(ostream& out, string_view input, Report report) {
     writeln(out, " │  {}", input);
     writeln(out, "─╯  {}", underlines);
 
-    for (auto& comment : report.comments) {
-        writeln(
-            out, "{}: {}", Report::kind_to_string(comment.first), comment.second
-        );
+    for (auto& [kind, message] : report.comments) {
+        writeln(out, "{}: {}", Report::kind_to_string(kind), message);
     }
 }

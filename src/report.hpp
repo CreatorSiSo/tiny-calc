@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "utf8.hpp"
 
 struct Span {
     size_t start;
@@ -9,7 +10,7 @@ struct Span {
     Span(size_t start_val, size_t len_val);
 
     auto debug() const -> string;
-    auto source(string_view str) const -> string_view;
+    auto source(string_view str) const -> StringView;
 };
 
 enum class ReportKind {

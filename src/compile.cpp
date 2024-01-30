@@ -51,7 +51,7 @@ static auto kind_to_binary_op(TokenKind kind) -> std::optional<OpCode> {
 static auto parse_number(Span span, string_view source)
     -> std::expected<double, Report> {
     string number_string;
-    for (auto chr : span.source(source)) {
+    for (char chr : span.source(source)) {
         if (chr != '_') number_string.push_back(chr);
     }
     try {
@@ -87,7 +87,7 @@ auto Compiler::compile_expr() -> std::optional<Report> {
     }
 
     if (token.kind == TokenKind::Ident) {
-        string_view ident = token.src(m_source);
+        StringView ident = token.source(m_source);
         if (ident == "cos" || ident == "c") {
             m_op_codes.push_back(OpCode::Cos);
         } else {

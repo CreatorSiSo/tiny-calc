@@ -1,3 +1,5 @@
+#pragma once
+
 #include "common.hpp"
 
 enum class UnitKind {
@@ -15,9 +17,9 @@ struct Unit {
 
     constexpr Unit(UnitKind kind, uint8_t data) : kind(kind), data(data) {}
 
-    constexpr auto length() -> int8_t {
+    constexpr auto length() -> uint8_t {
         if (kind == UnitKind::Follow || kind == UnitKind::Invalid) return 1;
-        return static_cast<int8_t>(kind);
+        return static_cast<uint8_t>(kind);
     }
 };
 
@@ -50,40 +52,79 @@ constexpr auto utf8_decode_unit(uint8_t byte) -> Unit {
     return Unit(UnitKind::Invalid, 0);
 }
 
-constexpr auto utf8_decode_scalar(string_view string)
-    -> std::pair<uint32_t, int8_t> {
+struct Scalar {
+    uint32_t value;
+    uint8_t length;
+};
+
+constexpr auto utf8_decode_scalar(string_view string) -> Scalar {
     constexpr uint32_t replacement_scalar = 0xFFFD;
 
-    if (string.empty()) return std::make_pair(replacement_scalar, -1);
+    // if (string.empty()) return {.value = replacement_scalar, .length = -1};
 
     auto start_unit = utf8_decode_unit(string[0]);
-    int8_t length = start_unit.length();
+    uint8_t length = start_unit.length();
     uint32_t scalar = start_unit.data;
 
     // index is also the amount of already consumed bytes
     for (uint8_t index = 1; index < length; index += 1) {
         if (string.size() <= index)
-            return std::make_pair(replacement_scalar, index);
+            return {.value = replacement_scalar, .length = index};
 
         auto follow_unit = utf8_decode_unit(string[index]);
         if (follow_unit.kind != UnitKind::Follow)
-            return std::make_pair(replacement_scalar, index);
+            return {.value = replacement_scalar, .length = index};
 
         scalar <<= 6;
         scalar |= follow_unit.data;
     }
 
-    return std::make_pair(scalar, length);
+    return {.value = scalar, .length = length};
 }
 
-constexpr auto utf8_amount_scalars(string_view string) -> size_t {
-    size_t offset = 0;
-    size_t amount = 0;
-    while (true) {
-        auto result = utf8_decode_scalar(string.substr(offset));
-        if (result.second < 0) break;
-        offset += result.second;
-        amount += 1;
+struct Chars {
+    constexpr Chars(string_view string) : m_data(string) {}
+
+    constexpr auto next() -> std::optional<uint32_t> {
+        if (m_data.empty()) return {};
+        auto [scalar, length] = utf8_decode_scalar(m_data);
+        m_data = m_data.substr(length);
+        return scalar;
     }
-    return amount;
-}
+
+   private:
+    string_view m_data;
+};
+
+struct StringView {
+    constexpr StringView(string_view data) : m_data(data) {}
+
+    constexpr auto chars() -> Chars { return Chars(m_data); }
+
+    constexpr auto width() -> size_t {
+        Chars chars_iter(m_data);
+        size_t amount = 0;
+
+        while (true) {
+            auto next = chars_iter.next();
+            if (!next.has_value()) break;
+            amount += 1;
+        }
+
+        return amount;
+    }
+
+    constexpr auto begin() const -> const char* { return m_data.begin(); }
+    constexpr auto end() const -> const char* { return m_data.end(); }
+
+    constexpr auto operator==(string_view other) -> bool {
+        return m_data == other;
+    }
+
+   private:
+    string_view m_data;
+};
+
+static_assert(sizeof(Chars) == sizeof(StringView));
+static_assert(sizeof(StringView) == sizeof(string_view));
+static_assert(std::is_trivially_copyable<StringView>{});
