@@ -5,7 +5,7 @@ import os
 import sys
 
 project_name = "tiny-calc"
-flags = "-std=c++23 -fdiagnostics-color -Wall -Wno-c++98-compat -Wno-padded"
+flags = "-std=c++23 -fdiagnostics-color -Wall -Wno-c++98-compat -Wno-padded" # -O3
 units = ["chunk", "compile", "interpret", "main", "report", "tokenize", "utf8"]
 
 with open("COMPILE.txt", "w", encoding="ascii") as file:
