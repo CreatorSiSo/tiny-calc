@@ -90,17 +90,17 @@ static auto validate_number(string_view source) -> size_t {
  * @return Length, in bytes, of the consumed characters.
  */
 static constexpr auto validate_identifier(string_view source) -> size_t {
-    size_t offset = 0;
+    size_t length_ident = 0;
 
-    for (const auto& [value, length] : Scalars(source)) {
-        if (std::iswspace(value) || std::iswpunct(value) ||
-            std::iswdigit(value))
+    for (const auto& [scalar, length] : UnicodeScalars(source)) {
+        if (std::iswspace(scalar) || std::iswpunct(scalar) ||
+            std::iswdigit(scalar))
             break;
 
-        offset += length;
+        length_ident += length;
     }
 
-    return offset;
+    return length_ident;
 }
 
 /**

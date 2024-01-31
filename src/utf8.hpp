@@ -23,22 +23,22 @@ struct Unit {
     }
 };
 
-struct Scalar {
-    uint32_t value;
+struct UnicodeScalar {
+    uint32_t scalar;
     uint8_t length;
 };
 
-struct Scalars {
-    constexpr Scalars(string_view string) : m_data(string) {
+struct UnicodeScalars {
+    constexpr UnicodeScalars(string_view string) : m_data(string) {
         m_next = utf8_decode_scalar(m_data);
     }
 
-    constexpr auto begin() const -> Scalars { return *this; }
-    constexpr auto end() const -> Scalars { return Scalars(""); }
+    constexpr auto begin() const -> UnicodeScalars { return *this; }
+    constexpr auto end() const -> UnicodeScalars { return UnicodeScalars(""); }
 
-    constexpr auto operator*() const -> const Scalar& { return *m_next; }
+    constexpr auto operator*() const -> const UnicodeScalar& { return *m_next; }
 
-    constexpr auto operator++() -> Scalars& {
+    constexpr auto operator++() -> UnicodeScalars& {
         if (m_next) {
             m_data = m_data.substr(m_next->length);
             m_next = utf8_decode_scalar(m_data);
@@ -46,13 +46,13 @@ struct Scalars {
         return *this;
     }
 
-    constexpr auto operator!=(const Scalars& other) const -> bool {
+    constexpr auto operator!=(const UnicodeScalars& other) const -> bool {
         return m_data != other.m_data;
     }
 
    private:
     constexpr static auto utf8_decode_scalar(string_view string)
-        -> std::optional<Scalar> {
+        -> std::optional<UnicodeScalar> {
         if (string.empty()) return {};
 
         constexpr uint32_t replacement_scalar = 0xFFFD;
@@ -63,17 +63,17 @@ struct Scalars {
         // index is also the amount of already consumed bytes
         for (uint8_t index = 1; index < length; index += 1) {
             if (string.size() <= index)
-                return {{.value = replacement_scalar, .length = index}};
+                return {{.scalar = replacement_scalar, .length = index}};
 
             auto follow_unit = utf8_decode_unit(string[index]);
             if (follow_unit.kind != UnitKind::Follow)
-                return {{.value = replacement_scalar, .length = index}};
+                return {{.scalar = replacement_scalar, .length = index}};
 
             scalar <<= 6;
             scalar |= follow_unit.data;
         }
 
-        return {{.value = scalar, .length = length}};
+        return {{.scalar = scalar, .length = length}};
     }
 
     constexpr static auto utf8_decode_unit(uint8_t byte) -> Unit {
@@ -107,13 +107,13 @@ struct Scalars {
 
    private:
     string_view m_data;
-    std::optional<Scalar> m_next;
+    std::optional<UnicodeScalar> m_next;
 };
 
 constexpr auto utf8_width(string_view string) -> size_t {
     size_t amount = 0;
 
-    for (auto _ : Scalars(string)) {
+    for (auto _ : UnicodeScalars(string)) {
         // noop to silence unused variable warning
         (void)_;
         amount += 1;

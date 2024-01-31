@@ -6,7 +6,7 @@ static_assert([] {
     std::array<int8_t, 4> lengths = {4, 3, 2, 1};
 
     for (size_t i = 0; i < strings.size(); i += 1) {
-        auto [scalar, length] = *Scalars(strings[i]);
+        auto [scalar, length] = *UnicodeScalars(strings[i]);
         if (scalar != scalars[i]) return false;
         if (length != lengths[i]) return false;
     }
