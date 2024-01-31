@@ -29,22 +29,33 @@ struct Scalar {
 };
 
 struct Scalars {
-    constexpr Scalars(string_view string) : m_data(string) {}
+    constexpr Scalars(string_view string) : m_data(string) {
+        m_next = utf8_decode_scalar(m_data);
+    }
 
-    constexpr auto next() -> std::optional<Scalar> {
-        if (m_data.empty()) return {};
-        auto scalar = utf8_decode_scalar(m_data);
-        m_data = m_data.substr(scalar.length);
-        return scalar;
+    constexpr auto begin() const -> Scalars { return *this; }
+    constexpr auto end() const -> Scalars { return Scalars(""); }
+
+    constexpr auto operator*() const -> const Scalar& { return *m_next; }
+
+    constexpr auto operator++() -> Scalars& {
+        if (m_next) {
+            m_data = m_data.substr(m_next->length);
+            m_next = utf8_decode_scalar(m_data);
+        }
+        return *this;
+    }
+
+    constexpr auto operator!=(const Scalars& other) const -> bool {
+        return m_data != other.m_data;
     }
 
    private:
-    constexpr static auto utf8_decode_scalar(string_view string) -> Scalar {
+    constexpr static auto utf8_decode_scalar(string_view string)
+        -> std::optional<Scalar> {
+        if (string.empty()) return {};
+
         constexpr uint32_t replacement_scalar = 0xFFFD;
-
-        // if (string.empty()) return {.value = replacement_scalar, .length =
-        // -1};
-
         auto start_unit = utf8_decode_unit(string[0]);
         uint8_t length = start_unit.length();
         uint32_t scalar = start_unit.data;
@@ -52,17 +63,17 @@ struct Scalars {
         // index is also the amount of already consumed bytes
         for (uint8_t index = 1; index < length; index += 1) {
             if (string.size() <= index)
-                return {.value = replacement_scalar, .length = index};
+                return {{.value = replacement_scalar, .length = index}};
 
             auto follow_unit = utf8_decode_unit(string[index]);
             if (follow_unit.kind != UnitKind::Follow)
-                return {.value = replacement_scalar, .length = index};
+                return {{.value = replacement_scalar, .length = index}};
 
             scalar <<= 6;
             scalar |= follow_unit.data;
         }
 
-        return {.value = scalar, .length = length};
+        return {{.value = scalar, .length = length}};
     }
 
     constexpr static auto utf8_decode_unit(uint8_t byte) -> Unit {
@@ -96,15 +107,15 @@ struct Scalars {
 
    private:
     string_view m_data;
+    std::optional<Scalar> m_next;
 };
 
 constexpr auto utf8_width(string_view string) -> size_t {
-    Scalars scalars_iter(string);
     size_t amount = 0;
 
-    while (true) {
-        auto next = scalars_iter.next();
-        if (!next.has_value()) break;
+    for (auto _ : Scalars(string)) {
+        // noop to silence unused variable warning
+        (void)_;
         amount += 1;
     }
 

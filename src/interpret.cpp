@@ -14,7 +14,7 @@ struct Stack {
     vector<Number> m_data;
 };
 
-auto interpret(Chunk&& chunk) -> Number {
+auto interpret(const Chunk& chunk) -> Number {
     Stack stack;
     size_t literal_index = 0;
 

@@ -140,7 +140,7 @@ int main() {
             if (config.print_chunks) print_chunk(out, *chunk);
         }
 
-        auto result = interpret(std::move(*chunk));
+        auto result = interpret(*chunk);
         writeln(out, "{}", result);
     }
 }
