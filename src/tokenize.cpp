@@ -74,16 +74,16 @@ static auto validate_number(string_view str) -> size_t {
 }
 
 static constexpr auto validate_identifier(string_view source) -> size_t {
-    Chars scalars(source);
+    Chars chars(source);
     size_t offset = 0;
 
     while (true) {
-        auto next = scalars.next();
+        auto next = chars.next();
         if (!next.has_value() || std::iswspace(*next) || std::iswpunct(*next) ||
             std::iswdigit(*next))
             break;
 
-        offset = scalars.offset();
+        offset = chars.offset();
     }
 
     return offset;

@@ -88,12 +88,18 @@ struct Chars {
     constexpr auto next() -> std::optional<uint32_t> {
         if (m_data.empty()) return {};
         auto [scalar, length] = utf8_decode_scalar(m_data);
+
         m_data = m_data.substr(length);
+        m_offset += length;
+
         return scalar;
     }
 
+    constexpr auto offset() const -> size_t { return m_offset; }
+
    private:
     string_view m_data;
+    size_t m_offset = 0;
 };
 
 struct StringView {
@@ -125,6 +131,21 @@ struct StringView {
     string_view m_data;
 };
 
-static_assert(sizeof(Chars) == sizeof(StringView));
+template <>
+struct std::formatter<StringView> {
+    template <class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
+
+    template <class FmtContext>
+    constexpr FmtContext::iterator format(StringView string, FmtContext& ctx)
+        const {
+        return std::format_to(
+            ctx.out(), "{}", string_view(string.begin(), string.end())
+        );
+    }
+};
+
 static_assert(sizeof(StringView) == sizeof(string_view));
 static_assert(std::is_trivially_copyable<StringView>{});
