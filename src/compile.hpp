@@ -22,9 +22,10 @@ struct Compiler {
     auto next() -> const Token&;
     auto expect(TokenKind expected_kind) -> std::optional<Report>;
 
-    size_t m_current;
+    const string_view m_source;
     vector<Token> m_tokens;
-    string_view m_source;
-    vector<OpCode> m_op_codes;
-    vector<double> m_literals;
+
+    size_t m_current = 0;
+    vector<OpCode> m_op_codes = {};
+    vector<Number> m_literals = {};
 };

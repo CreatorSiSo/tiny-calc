@@ -1,8 +1,8 @@
 #pragma once
 
+#include <cstdint>
 #include <format>
 #include <iostream>
-#include <memory>
 #include <source_location>
 #include <vector>
 

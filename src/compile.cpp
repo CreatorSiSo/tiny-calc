@@ -1,6 +1,7 @@
 #include "compile.hpp"
 
 #include <algorithm>
+#include <ranges>
 
 auto Compiler::compile(vector<Token>&& tokens, string_view source)
     -> std::expected<Chunk, Report> {
@@ -8,12 +9,11 @@ auto Compiler::compile(vector<Token>&& tokens, string_view source)
 
     if (const auto report = compiler.compile_expr())
         return std::unexpected(*report);
-
     if (const auto report = compiler.expect(TokenKind::EndOfInput))
         return std::unexpected(*report);
 
-    // opcodes and literals are compiled in reverse order, reversing them puts
-    // them in the correct order
+    // opcodes and literals are pushed back in reverse order,
+    // reversing them puts them in the correct order for execution
     std::reverse(compiler.m_op_codes.begin(), compiler.m_op_codes.end());
     std::reverse(compiler.m_literals.begin(), compiler.m_literals.end());
 
@@ -23,7 +23,7 @@ auto Compiler::compile(vector<Token>&& tokens, string_view source)
 }
 
 Compiler::Compiler(vector<Token>&& tokens, string_view source)
-    : m_current(0), m_tokens(tokens), m_source(source) {
+    : m_source(source), m_tokens(tokens) {
     // Index of last character of last token
     size_t end = 0;
     if (!m_tokens.empty()) {
@@ -36,21 +36,21 @@ Compiler::Compiler(vector<Token>&& tokens, string_view source)
 
 static auto parse_number(Span span, string_view source)
     -> std::expected<double, Report> {
-    string number_string;
-    for (char chr : span.source(source)) {
-        if (chr != '_') number_string.push_back(chr);
-    }
+    auto filter_view = span.source(source) |
+                       std::views::filter([](char c) { return c != '_'; });
+    string filtered(filter_view.begin(), filter_view.end());
+
     try {
-        return std::stod(number_string);
-    } catch (const std::out_of_range& e) {
-        auto note = std::make_pair(
+        return std::stod(filtered);
+    } catch (const std::out_of_range& _) {
+        std::pair<ReportKind, string> note = {
             ReportKind::Note,
             std::format("{} is the maximum", std::numeric_limits<double>::max())
-        );
+        };
         return std::unexpected(Report(
             ReportKind::Error, "Number literal too large", {span}, {note}
         ));
-    } catch (const std::invalid_argument& e) {
+    } catch (const std::invalid_argument& _) {
         return std::unexpected(
             Report(ReportKind::Error, "Number literal invalid", {span})
         );

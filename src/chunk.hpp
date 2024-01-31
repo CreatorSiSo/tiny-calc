@@ -2,6 +2,8 @@
 
 #include "common.hpp"
 
+using Number = double;
+
 enum class OpCode {
     Add,
     Sub,
