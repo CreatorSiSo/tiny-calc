@@ -20,6 +20,7 @@ struct Compiler {
     auto compile_expr() -> std::optional<Report>;
 
     auto next() -> const Token&;
+    auto expect(TokenKind expected_kind) -> std::optional<Report>;
 
     size_t m_current;
     vector<Token> m_tokens;

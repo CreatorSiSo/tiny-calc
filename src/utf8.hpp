@@ -23,67 +23,13 @@ struct Unit {
     }
 };
 
-constexpr auto utf8_decode_unit(uint8_t byte) -> Unit {
-    // First bit is zero
-    if ((byte >> 7) == 0b0) {
-        return Unit(UnitKind::One, byte);
-    }
-
-    // First bit is one and second bit is zero
-    if ((byte >> 6) == 0b10) {
-        return Unit(UnitKind::Follow, byte & 0b00111111);
-    }
-
-    // First two bits are one and third bit is zero
-    if ((byte >> 5) == 0b110) {
-        return Unit(UnitKind::Two, byte & 0b00011111);
-    }
-
-    // First three bits are one and fourth bit is zero
-    if ((byte >> 4) == 0b1110) {
-        return Unit(UnitKind::Three, byte & 0b00001111);
-    }
-
-    // First four bits are one and the fifth is zero
-    if ((byte >> 3) == 0b11110) {
-        return Unit(UnitKind::Four, byte & 0b00000111);
-    }
-
-    return Unit(UnitKind::Invalid, 0);
-}
-
 struct Scalar {
     uint32_t value;
     uint8_t length;
 };
 
-constexpr auto utf8_decode_scalar(string_view string) -> Scalar {
-    constexpr uint32_t replacement_scalar = 0xFFFD;
-
-    // if (string.empty()) return {.value = replacement_scalar, .length = -1};
-
-    auto start_unit = utf8_decode_unit(string[0]);
-    uint8_t length = start_unit.length();
-    uint32_t scalar = start_unit.data;
-
-    // index is also the amount of already consumed bytes
-    for (uint8_t index = 1; index < length; index += 1) {
-        if (string.size() <= index)
-            return {.value = replacement_scalar, .length = index};
-
-        auto follow_unit = utf8_decode_unit(string[index]);
-        if (follow_unit.kind != UnitKind::Follow)
-            return {.value = replacement_scalar, .length = index};
-
-        scalar <<= 6;
-        scalar |= follow_unit.data;
-    }
-
-    return {.value = scalar, .length = length};
-}
-
 struct Chars {
-    constexpr Chars(string_view string) : m_data(string) {}
+    constexpr Chars(std::string_view string) : m_data(string) {}
 
     constexpr auto next() -> std::optional<uint32_t> {
         if (m_data.empty()) return {};
@@ -98,12 +44,69 @@ struct Chars {
     constexpr auto offset() const -> size_t { return m_offset; }
 
    private:
-    string_view m_data;
+    constexpr static auto utf8_decode_scalar(std::string_view string)
+        -> Scalar {
+        constexpr uint32_t replacement_scalar = 0xFFFD;
+
+        // if (string.empty()) return {.value = replacement_scalar, .length =
+        // -1};
+
+        auto start_unit = utf8_decode_unit(string[0]);
+        uint8_t length = start_unit.length();
+        uint32_t scalar = start_unit.data;
+
+        // index is also the amount of already consumed bytes
+        for (uint8_t index = 1; index < length; index += 1) {
+            if (string.size() <= index)
+                return {.value = replacement_scalar, .length = index};
+
+            auto follow_unit = utf8_decode_unit(string[index]);
+            if (follow_unit.kind != UnitKind::Follow)
+                return {.value = replacement_scalar, .length = index};
+
+            scalar <<= 6;
+            scalar |= follow_unit.data;
+        }
+
+        return {.value = scalar, .length = length};
+    }
+
+    constexpr static auto utf8_decode_unit(uint8_t byte) -> Unit {
+        // First bit is zero
+        if ((byte >> 7) == 0b0) {
+            return Unit(UnitKind::One, byte);
+        }
+
+        // First bit is one and second bit is zero
+        if ((byte >> 6) == 0b10) {
+            return Unit(UnitKind::Follow, byte & 0b00111111);
+        }
+
+        // First two bits are one and third bit is zero
+        if ((byte >> 5) == 0b110) {
+            return Unit(UnitKind::Two, byte & 0b00011111);
+        }
+
+        // First three bits are one and fourth bit is zero
+        if ((byte >> 4) == 0b1110) {
+            return Unit(UnitKind::Three, byte & 0b00001111);
+        }
+
+        // First four bits are one and the fifth is zero
+        if ((byte >> 3) == 0b11110) {
+            return Unit(UnitKind::Four, byte & 0b00000111);
+        }
+
+        return Unit(UnitKind::Invalid, 0);
+    }
+
+   private:
+    std::string_view m_data;
     size_t m_offset = 0;
 };
 
 struct StringView {
-    constexpr StringView(string_view data) : m_data(data) {}
+    constexpr StringView(std::string_view data) : m_data(data) {}
 
     constexpr auto chars() -> Chars { return Chars(m_data); }
 
@@ -120,15 +123,17 @@ struct StringView {
         return amount;
     }
 
+    constexpr auto size_bytes() -> size_t { return m_data.size(); }
+
     constexpr auto begin() const -> const char* { return m_data.begin(); }
     constexpr auto end() const -> const char* { return m_data.end(); }
 
-    constexpr auto operator==(string_view other) -> bool {
+    constexpr auto operator==(std::string_view other) -> bool {
         return m_data == other;
     }
 
    private:
-    string_view m_data;
+    std::string_view m_data;
 };
 
 template <>
@@ -147,5 +152,5 @@ struct std::formatter<StringView> {
     }
 };
 
-static_assert(sizeof(StringView) == sizeof(string_view));
+static_assert(sizeof(StringView) == sizeof(std::string_view));
 static_assert(std::is_trivially_copyable<StringView>{});
