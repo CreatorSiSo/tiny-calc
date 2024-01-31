@@ -35,7 +35,7 @@ Compiler::Compiler(vector<Token>&& tokens, string_view source)
 }
 
 static auto parse_number(Span span, string_view source)
-    -> std::expected<double, Report> {
+    -> std::expected<Number, Report> {
     auto filter_view = span.source(source) |
                        std::views::filter([](char c) { return c != '_'; });
     string filtered(filter_view.begin(), filter_view.end());
@@ -45,7 +45,7 @@ static auto parse_number(Span span, string_view source)
     } catch (const std::out_of_range& _) {
         std::pair<ReportKind, string> note = {
             ReportKind::Note,
-            std::format("{} is the maximum", std::numeric_limits<double>::max())
+            std::format("{} is the maximum", std::numeric_limits<Number>::max())
         };
         return std::unexpected(Report(
             ReportKind::Error, "Number literal too large", {span}, {note}

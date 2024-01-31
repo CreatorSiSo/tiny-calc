@@ -17,12 +17,12 @@ enum class OpCode {
 auto op_code_to_string(OpCode op_code) -> string_view;
 
 struct Chunk {
-    Chunk(vector<OpCode>&& m_op_codes, vector<double>&& m_literals);
+    Chunk(vector<OpCode>&& m_op_codes, vector<Number>&& m_literals);
 
     auto op_codes() const -> const vector<OpCode>&;
-    auto literals() const -> const vector<double>&;
+    auto literals() const -> const vector<Number>&;
 
    private:
     vector<OpCode> m_op_codes;
-    vector<double> m_literals;
+    vector<Number> m_literals;
 };

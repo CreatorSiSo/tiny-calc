@@ -3,18 +3,18 @@
 #include <cmath>
 
 struct Stack {
-    auto push(double value) -> void { m_data.push_back(value); }
-    auto pop() -> double {
-        double result = m_data.back();
+    auto push(Number value) -> void { m_data.push_back(value); }
+    auto pop() -> Number {
+        Number result = m_data.back();
         m_data.pop_back();
         return result;
     }
 
    private:
-    vector<double> m_data;
+    vector<Number> m_data;
 };
 
-auto interpret(Chunk&& chunk) -> double {
+auto interpret(Chunk&& chunk) -> Number {
     Stack stack;
     size_t literal_index = 0;
 

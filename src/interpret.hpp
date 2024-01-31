@@ -3,4 +3,4 @@
 #include "chunk.hpp"
 #include "common.hpp"
 
-auto interpret(Chunk&& chunk) -> double;
+auto interpret(Chunk&& chunk) -> Number;
