@@ -1,0 +1,1 @@
+g++ src/chunk.cpp src/compile.cpp src/interpret.cpp src/main.cpp src/report.cpp src/tokenize.cpp src/utf8.cpp -std=c++23 -fdiagnostics-color -Wall -Wno-c++98-compat -Wno-padded -o tiny-calc
