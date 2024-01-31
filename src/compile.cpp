@@ -1,6 +1,7 @@
 #include "compile.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <ranges>
 
 auto Compiler::compile(vector<Token>&& tokens, string_view source)
@@ -89,13 +90,22 @@ auto Compiler::compile_expr() -> std::optional<Report> {
     if (token.kind == TokenKind::Identifier) {
         string_view ident = token.source(m_source);
 
+        // Constants
+        if (ident == "π" || ident == "pi") {
+            m_op_codes.push_back(OpCode::Literal);
+            m_literals.push_back(M_PIf64);
+            return {};
+        }
+
+        // Functions
         if (ident == "cos" || ident == "c") {
             m_op_codes.push_back(OpCode::Cos);
         } else if (ident == "sin" || ident == "s") {
             m_op_codes.push_back(OpCode::Sin);
         } else {
             return Report(
-                ReportKind::Error, std::format("Unknown function <{}>", ident),
+                ReportKind::Error,
+                std::format("Unknown function or constant <{}>", ident),
                 {token.span}
             );
         }
