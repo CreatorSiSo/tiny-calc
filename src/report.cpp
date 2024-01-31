@@ -8,9 +8,9 @@ auto Span::debug() const -> string {
     return std::format("{}..{}", start, start + len);
 }
 
-auto Span::source(string_view source) const -> StringView {
+auto Span::source(string_view source) const -> string_view {
     assert(start >= 0);
-    return StringView(source.substr(start, len));
+    return string_view(source.substr(start, len));
 }
 
 Report::Report(ReportKind kind, string message)
@@ -53,8 +53,8 @@ void write_report(ostream& out, string_view input, Report report) {
         auto [start, length] = span;
         if (start < smallest_start) smallest_start = start;
 
-        size_t width_start = Span(0, start).source(input).width();
-        size_t width_span = span.source(input).width();
+        size_t width_start = utf8_width(Span(0, start).source(input));
+        size_t width_span = utf8_width(span.source(input));
 
         underlines.replace(
             width_start, length, repeat("^", std::max(width_span, (size_t)1))

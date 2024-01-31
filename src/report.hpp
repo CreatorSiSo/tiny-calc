@@ -10,7 +10,7 @@ struct Span {
     Span(size_t start_val, size_t len_val);
 
     auto debug() const -> string;
-    auto source(string_view str) const -> StringView;
+    auto source(string_view str) const -> string_view;
 };
 
 enum class ReportKind {

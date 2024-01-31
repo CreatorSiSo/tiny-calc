@@ -13,6 +13,8 @@ struct Config {
     bool print_chunks;
 };
 
+constexpr auto INDENT = "    ";
+
 static void write_help(ostream& out) {
     write(
         out,
@@ -56,11 +58,36 @@ static InputEnd get_input(istream& in, string& line) {
     }
 }
 
+static void print_tokens(
+    ostream& out, const vector<Token> tokens, string_view source
+) {
+    writeln(out, "Tokens:");
+    for (const auto& token : tokens) {
+        writeln(
+            out, "{}{}[{}] {}", INDENT, token.name(), token.source(source),
+            token.span.debug()
+        );
+    }
+}
+
+static void print_chunk(ostream& out, const Chunk chunk) {
+    const auto& op_codes = chunk.op_codes();
+    const auto& literals = chunk.literals();
+
+    writeln(out, "OpCodes:");
+    for (size_t i = 0; i < op_codes.size(); i += 1) {
+        writeln(out, "{}[{}] {}", INDENT, i, op_code_to_string(op_codes[i]));
+    }
+    writeln(out, "Literals:");
+    for (size_t i = 0; i < literals.size(); i += 1) {
+        writeln(out, "{}[{}] {}", INDENT, i, literals[i]);
+    }
+}
+
 int main() {
     istream& in = std::cin;
     ostream& out = std::cout;
 
-    constexpr auto indent = "    ";
     Config config{
         .print_tokens = false,
         .print_chunks = false,
@@ -78,6 +105,7 @@ int main() {
         }
         if (line.empty()) continue;
 
+        // Execute repl command (like :help or :tokens)
         if (line.at(0) == ':') {
             run_command(line.substr(1), config, out);
             continue;
@@ -85,12 +113,8 @@ int main() {
 
         auto tokens = tokenize(line);
         {
-            if (config.print_tokens) {
-                writeln(out, "Tokens:");
-                for (const auto& token : tokens) {
-                    writeln(out, "{}{}", indent, token.debug(line));
-                }
-            }
+            if (config.print_tokens) print_tokens(out, tokens, line);
+
             vector<Span> error_spans;
             for (auto& token : tokens) {
                 if (token.kind == TokenKind::Error)
@@ -106,32 +130,17 @@ int main() {
             }
         }
 
-        auto maybe_chunk = Compiler::compile(std::move(tokens), line);
+        auto chunk = Compiler::compile(std::move(tokens), line);
         {
-            if (!maybe_chunk.has_value()) {
-                const auto& report = maybe_chunk.error();
+            if (!chunk.has_value()) {
+                const auto& report = chunk.error();
                 write_report(out, line, report);
                 continue;
             }
-            if (config.print_chunks) {
-                const auto& op_codes = maybe_chunk->op_codes();
-                const auto& literals = maybe_chunk->literals();
-
-                writeln(out, "OpCodes:");
-                for (size_t i = 0; i < op_codes.size(); i += 1) {
-                    writeln(
-                        out, "{}[{}] {}", indent, i,
-                        op_code_to_string(op_codes[i])
-                    );
-                }
-                writeln(out, "Literals:");
-                for (size_t i = 0; i < literals.size(); i += 1) {
-                    writeln(out, "{}[{}] {}", indent, i, literals[i]);
-                }
-            }
+            if (config.print_chunks) print_chunk(out, *chunk);
         }
 
-        auto result = interpret(std::move(*maybe_chunk));
+        auto result = interpret(std::move(*chunk));
         writeln(out, "{}", result);
     }
 }

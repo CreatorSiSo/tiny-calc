@@ -86,8 +86,8 @@ auto Compiler::compile_expr() -> std::optional<Report> {
         return {};
     }
 
-    if (token.kind == TokenKind::Ident) {
-        StringView ident = token.source(m_source);
+    if (token.kind == TokenKind::Identifier) {
+        string_view ident = token.source(m_source);
 
         if (ident == "cos" || ident == "c") {
             m_op_codes.push_back(OpCode::Cos);

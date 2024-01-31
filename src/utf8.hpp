@@ -28,24 +28,18 @@ struct Scalar {
     uint8_t length;
 };
 
-struct Chars {
-    constexpr Chars(std::string_view string) : m_data(string) {}
+struct Scalars {
+    constexpr Scalars(string_view string) : m_data(string) {}
 
-    constexpr auto next() -> std::optional<uint32_t> {
+    constexpr auto next() -> std::optional<Scalar> {
         if (m_data.empty()) return {};
-        auto [scalar, length] = utf8_decode_scalar(m_data);
-
-        m_data = m_data.substr(length);
-        m_offset += length;
-
+        auto scalar = utf8_decode_scalar(m_data);
+        m_data = m_data.substr(scalar.length);
         return scalar;
     }
 
-    constexpr auto offset() const -> size_t { return m_offset; }
-
    private:
-    constexpr static auto utf8_decode_scalar(std::string_view string)
-        -> Scalar {
+    constexpr static auto utf8_decode_scalar(string_view string) -> Scalar {
         constexpr uint32_t replacement_scalar = 0xFFFD;
 
         // if (string.empty()) return {.value = replacement_scalar, .length =
@@ -101,56 +95,18 @@ struct Chars {
     }
 
    private:
-    std::string_view m_data;
-    size_t m_offset = 0;
+    string_view m_data;
 };
 
-struct StringView {
-    constexpr StringView(std::string_view data) : m_data(data) {}
+constexpr auto utf8_width(string_view string) -> size_t {
+    Scalars scalars_iter(string);
+    size_t amount = 0;
 
-    constexpr auto chars() -> Chars { return Chars(m_data); }
-
-    constexpr auto width() -> size_t {
-        Chars chars_iter(m_data);
-        size_t amount = 0;
-
-        while (true) {
-            auto next = chars_iter.next();
-            if (!next.has_value()) break;
-            amount += 1;
-        }
-
-        return amount;
+    while (true) {
+        auto next = scalars_iter.next();
+        if (!next.has_value()) break;
+        amount += 1;
     }
 
-    constexpr auto size_bytes() -> size_t { return m_data.size(); }
-
-    constexpr auto begin() const -> const char* { return m_data.begin(); }
-    constexpr auto end() const -> const char* { return m_data.end(); }
-
-    constexpr auto operator==(std::string_view other) -> bool {
-        return m_data == other;
-    }
-
-   private:
-    std::string_view m_data;
-};
-
-template <>
-struct std::formatter<StringView> {
-    template <class ParseContext>
-    constexpr ParseContext::iterator parse(ParseContext& ctx) {
-        return ctx.begin();
-    }
-
-    template <class FmtContext>
-    constexpr FmtContext::iterator format(StringView string, FmtContext& ctx)
-        const {
-        return std::format_to(
-            ctx.out(), "{}", string_view(string.begin(), string.end())
-        );
-    }
-};
-
-static_assert(sizeof(StringView) == sizeof(std::string_view));
-static_assert(std::is_trivially_copyable<StringView>{});
+    return amount;
+}
