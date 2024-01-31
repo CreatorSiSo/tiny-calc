@@ -8,6 +8,7 @@ enum class OpCode {
     Mul,
     Div,
     Cos,
+    Sin,
     Literal,
 };
 

@@ -12,6 +12,8 @@ auto op_code_to_string(OpCode op_code) -> string_view {
             return "Div";
         case OpCode::Cos:
             return "Cos";
+        case OpCode::Sin:
+            return "Sin";
         case OpCode::Literal:
             return "Literal";
         default:

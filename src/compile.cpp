@@ -88,14 +88,16 @@ auto Compiler::compile_expr() -> std::optional<Report> {
 
     if (token.kind == TokenKind::Ident) {
         StringView ident = token.source(m_source);
+
         if (ident == "cos" || ident == "c") {
             m_op_codes.push_back(OpCode::Cos);
-        } else {
+        } else if (ident == "sin" || ident == "s") {
+            m_op_codes.push_back(OpCode::Sin);
+        } else
             return Report(
                 ReportKind::Error, std::format("Unknown function <{}>", ident),
                 {token.span}
             );
-        }
 
         auto maybe_error = compile_expr();
         if (maybe_error.has_value()) return maybe_error;

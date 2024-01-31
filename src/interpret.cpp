@@ -39,6 +39,12 @@ auto interpret(Chunk&& chunk) -> double {
             case OpCode::Cos:
                 stack.push(std::cos(stack.pop()));
                 break;
+            case OpCode::Sin:
+                stack.push(std::sin(stack.pop()));
+                break;
+            default:
+                panic("Unkown opcode <{}>", (uint8_t)op_code);
+                break;
         }
     }
 
