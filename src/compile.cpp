@@ -10,7 +10,7 @@ auto Compiler::compile(vector<Token>&& tokens, string_view source)
 
     if (const auto report = compiler.compile_expr())
         return std::unexpected(*report);
-    if (const auto report = compiler.expect_token(TokenKind::EndOfInput))
+    if (const auto report = compiler.m_tokens.expect(TokenKind::EndOfInput))
         return std::unexpected(*report);
 
     // opcodes and literals are pushed back in reverse order,
@@ -22,16 +22,7 @@ auto Compiler::compile(vector<Token>&& tokens, string_view source)
 }
 
 Compiler::Compiler(vector<Token>&& tokens, string_view source)
-    : m_source(source), m_tokens(tokens) {
-    // Index of last character of last token
-    size_t end = 0;
-    if (!m_tokens.empty()) {
-        Span last_span = m_tokens.back().span;
-        end = last_span.start + last_span.len;
-    }
-
-    m_tokens.push_back(Token(TokenKind::EndOfInput, Span(end, 0)));
-}
+    : m_source(source), m_tokens(TokenStream(std::move(tokens))) {}
 
 static auto parse_number(Span span, string_view source)
     -> std::expected<Number, Report> {
@@ -76,7 +67,7 @@ static auto kind_to_binary_op(TokenKind kind) -> std::optional<OpCode> {
  * @return Pointer to an upcasted expression tree.
  */
 auto Compiler::compile_expr() -> std::optional<Report> {
-    const Token& token = next_token();
+    const Token& token = m_tokens.next();
 
     if (token.kind == TokenKind::Number) {
         const auto result = parse_number(token.span, m_source);
@@ -137,7 +128,18 @@ auto Compiler::compile_binary(OpCode opcode) -> std::optional<Report> {
     return {};
 }
 
-auto Compiler::next_token() -> const Token& {
+Compiler::TokenStream::TokenStream(vector<Token>&& tokens) : m_tokens(tokens) {
+    // Index of last character of last token
+    size_t end = 0;
+    if (!m_tokens.empty()) {
+        Span last_span = m_tokens.back().span;
+        end = last_span.start + last_span.len;
+    }
+
+    m_tokens.push_back(Token(TokenKind::EndOfInput, Span(end, 0)));
+}
+
+auto Compiler::TokenStream::next() -> const Token& {
     if (m_current < m_tokens.size()) {
         const Token& result = m_tokens.at(m_current);
         m_current += 1;
@@ -148,8 +150,9 @@ auto Compiler::next_token() -> const Token& {
     return m_tokens.back();
 }
 
-auto Compiler::expect_token(TokenKind expected_kind) -> std::optional<Report> {
-    auto& token = next_token();
+auto Compiler::TokenStream::expect(TokenKind expected_kind)
+    -> std::optional<Report> {
+    auto& token = next();
     if (token.kind == expected_kind) return {};
     return Report(
         ReportKind::Error,

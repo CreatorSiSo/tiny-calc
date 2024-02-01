@@ -6,15 +6,42 @@
 #include "common.hpp"
 #include "tokenize.hpp"
 
-// expr ::= binary | number
-// binary ::= operator expr expr | number
-// number ::= digit (digit | "_")* ("." (digit | "_")*)?
+/**
+ * @brief Transforms tokens into a Chunk.
+ */
 struct Compiler {
-    /// @param tokens Enforcing move here to avoid accidental copying.
+    /**
+     * @brief Validate and transform tokens into a compiled chunk.
+     *
+     * Only expression of this form are valid:
+     * ```
+     * expr ::= constant | number | unary | binary
+     * binary ::= binary_op expr expr
+     * binary_op ::= "+" | "-" | "*" | "/"
+     * unary ::= unary_op expr
+     * unary_op ::= "c" | "cos" | "s" | "sin"
+     * number ::= digit (digit | "_")* ("." (digit | "_")*)?
+     * constant ::= "π" | "pi"
+     * ```
+     *
+     * @param tokens Enforcing move here to avoid accidental copying.
+     * @param source Input used to generate the tokens.
+     * @return Compiled chunk or an error.
+     */
     static auto compile(vector<Token>&& tokens, string_view source)
         -> std::expected<Chunk, Report>;
 
    private:
+    struct TokenStream {
+        TokenStream(vector<Token>&& tokens);
+        auto next() -> const Token&;
+        auto expect(TokenKind expected_kind) -> std::optional<Report>;
+
+       private:
+        vector<Token> m_tokens;
+        size_t m_current = 0;
+    };
+
     Compiler(vector<Token>&& tokens, string_view source);
 
     auto compile_expr() -> std::optional<Report>;
@@ -22,13 +49,8 @@ struct Compiler {
     auto compile_unary(OpCode opcode) -> std::optional<Report>;
     auto compile_binary(OpCode opcode) -> std::optional<Report>;
 
-    auto next_token() -> const Token&;
-    auto expect_token(TokenKind expected_kind) -> std::optional<Report>;
-
     const string_view m_source;
-    vector<Token> m_tokens;
-
-    size_t m_current = 0;
+    TokenStream m_tokens;
     vector<OpCode> m_opcodes = {};
     vector<Number> m_literals = {};
 };
