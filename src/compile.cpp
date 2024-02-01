@@ -10,8 +10,10 @@ auto Compiler::compile(std::span<const Token> tokens, string_view source)
 
     if (const auto report = compiler.compile_expr())
         return std::unexpected(*report);
-    if (const auto report = compiler.m_tokens.expect(TokenKind::EndOfInput))
-        return std::unexpected(*report);
+    const auto report = compiler.m_tokens.expect(TokenKind::EndOfInput);
+    if (!report.has_value()) {
+        return std::unexpected(report.error());
+    }
 
     // opcodes and literals are pushed back in reverse order,
     // reversing them puts them in the correct order for execution
@@ -152,12 +154,12 @@ auto Compiler::TokenStream::next() -> const Token& {
 }
 
 auto Compiler::TokenStream::expect(TokenKind expected_kind)
-    -> std::optional<Report> {
+    -> std::expected<void, Report> {
     auto& token = next();
     if (token.kind == expected_kind) return {};
-    return Report(
+    return std::unexpected(Report(
         ReportKind::Error,
         std::format("Excpected <EndOfInput> found <{}>", token.name()),
         {token.span}
-    );
+    ));
 }

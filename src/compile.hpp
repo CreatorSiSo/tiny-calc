@@ -35,7 +35,7 @@ struct Compiler {
     struct TokenStream {
         TokenStream(std::span<const Token> tokens);
         auto next() -> const Token&;
-        auto expect(TokenKind expected_kind) -> std::optional<Report>;
+        auto expect(TokenKind expected_kind) -> std::expected<void, Report>;
 
        private:
         std::span<const Token> m_tokens;
