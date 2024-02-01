@@ -8,10 +8,10 @@
  * @brief Formats and writes the provided message.
  *
  * Does not flush the output stream.
- * See `std::format` on how formatting works. (in the <format> header)
+ * See `std::format` on how formatting works. (in the `format` header)
  *
  * @param out Output stream to write into.
- * @param fmt `format_string` to inserted arguments into.
+ * @param fmt Message to inserted format arguments into.
  * @param ...args The arguments inserted into `fmt`.
  */
 template <typename... Args>
@@ -25,10 +25,10 @@ inline void write(
  * @brief Formats and writes the provided message and a newline ("\n").
  *
  * Does not flush the output stream.
- * See `std::format` on how formatting works. (in the <format> header)
+ * See `std::format` on how formatting works. (in the `format` header)
  *
  * @param out Output stream to write into.
- * @param fmt `format_string` to inserted arguments into.
+ * @param fmt Message to inserted format arguments into.
  * @param ...args The arguments inserted into `fmt`.
  */
 template <typename... Args>
@@ -61,10 +61,10 @@ struct PanicFormat {
  * @brief Formats and writes the provided message to stderr, then aborts.
  *
  * Flushes the output stream.
- * See `std::format` on how formatting works. (in the <format> header)
+ * See `std::format` on how formatting works. (in the `format` header)
  *
- * @param panic_fmt `format_string` to inserted arguments into.
- * @param ...args The arguments inserted into `fmt`.
+ * @param panic_fmt Message to inserted format arguments into.
+ * @param ...args The arguments inserted into `panic_fmt`.
  */
 template <typename... Args>
 [[noreturn]]
