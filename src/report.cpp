@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <format>
+#include <ranges>
 
 #include "print.hpp"
 
@@ -38,7 +39,7 @@ static auto repeat_string(std::string_view value, uint32_t times)
     return result;
 }
 
-auto Report::kind_to_string(ReportKind kind) -> std::string_view {
+static auto report_kind_to_string(ReportKind kind) -> std::string_view {
     switch (kind) {
         case ReportKind::Error:
             return "Error";
@@ -49,36 +50,54 @@ auto Report::kind_to_string(ReportKind kind) -> std::string_view {
     }
 }
 
-void write_report(std::ostream& out, std::string_view input, Report report) {
-    // largest start of all spans
-    size_t smallest_start = 0;
-    std::string underlines(utf8_width(input), ' ');
+static auto row_colum(std::string_view source, size_t index)
+    -> std::pair<size_t, size_t> {
+    std::string_view before_index = source.substr(0, index);
 
-    for (Span span : report.spans) {
-        auto [start, length] = span;
-        if (start < smallest_start) smallest_start = start;
+    size_t row = 1;
+    for (char c : before_index) {
+        if (c == '\n') row += 1;
+    }
+    size_t line_start = before_index.rfind('\n');
+    size_t column = utf8_width(before_index);
+    if (line_start != std::string::npos) {
+        column = utf8_width(before_index.substr(line_start));
+    }
 
-        size_t width_start = utf8_width(Span(0, start).source(input));
-        size_t width_span = utf8_width(span.source(input));
+    return {row, column};
+}
+
+static void write_source_block(
+    std::ostream& out, std::string_view source, std::span<const Span> spans
+) {
+    std::string underlines(utf8_width(source), ' ');
+
+    for (Span span : spans) {
+        size_t width_start = utf8_width(Span(0, span.start).source(source));
+        size_t width_span = utf8_width(span.source(source));
 
         underlines.replace(
-            width_start, length,
+            width_start, span.length,
             repeat_string("^", std::max(width_span, (size_t)1))
         );
     }
 
-    size_t line = 1;
-    for (char c : input.substr(0, smallest_start)) {
-        if (c == '\n') line += 1;
-    }
-    // TODO calculate column
+    // smallest start index of all spans
+    size_t min_start =
+        std::ranges::min(spans, {}, [](Span span) { return span.start; }).start;
+    const auto [row, column] = row_colum(source, min_start);
 
-    writeln(out, "{}: {}", Report::kind_to_string(report.kind), report.message);
-    writeln(out, " ╭──[repl:{}:{}]", line, 0);
-    writeln(out, " │  {}", input);
+    writeln(out, " ╭──[repl:{}:{}]", row, column);
+    writeln(out, " │  {}", source);
     writeln(out, "─╯  {}", underlines);
+}
 
-    for (auto& [kind, message] : report.comments) {
-        writeln(out, "{}: {}", Report::kind_to_string(kind), message);
+void Report::write(std::ostream& out, std::string_view source) const {
+    writeln(out, "{}: {}", report_kind_to_string(kind), message);
+
+    if (!source.empty()) write_source_block(out, source, spans);
+
+    for (auto& [kind, message] : comments) {
+        writeln(out, "{}: {}", report_kind_to_string(kind), message);
     }
 }

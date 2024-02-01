@@ -44,12 +44,10 @@ struct Report {
         std::vector<std::pair<ReportKind, std::string>> notes
     );
 
-    static auto kind_to_string(ReportKind kind) -> std::string_view;
+    void write(std::ostream& out, std::string_view source) const;
 
     const ReportKind kind;
     const std::string message;
     const std::vector<Span> spans;
     const std::vector<std::pair<ReportKind, std::string>> comments;
 };
-
-void write_report(std::ostream& out, std::string_view input, Report report);

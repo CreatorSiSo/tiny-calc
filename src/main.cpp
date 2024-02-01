@@ -69,7 +69,7 @@ static void write_examples(std::ostream& out) {
 static void run_command(
     std::string_view name, Config& config, std::ostream& out
 ) {
-    if (name == "help")
+    if (name == "help" || name == "?")
         write_help(out);
     else if (name == "examples")
         write_examples(out);
@@ -79,10 +79,11 @@ static void run_command(
         config.print_chunks = !config.print_chunks;
     else if (name == "quit" || name == "exit")
         exit(0);
-    else {
-        writeln(out, "Error: Unkown command <:{}>", name);
-        writeln(out, "Note: Type <:help> for a list of valid commands");
-    }
+    else
+        Report(
+            ReportKind::Error, std::format("Unkown command <:{}>", name), {},
+            {{ReportKind::Note, "Type <:help> for a list of valid commands"}}
+        ).write(out, "");
 }
 
 enum class InputEnd {
@@ -166,11 +167,12 @@ int main() {
                     error_spans.push_back(token.span);
             }
             if (!error_spans.empty()) {
-                std::string message =
-                    error_spans.size() > 1 ? "Invalid Tokens" : "Invalid Token";
-                write_report(
-                    out, line, Report(ReportKind::Error, message, error_spans)
-                );
+                Report(
+                    ReportKind::Error,
+                    error_spans.size() > 1 ? "Invalid Tokens" : "Invalid Token",
+                    error_spans
+                )
+                    .write(out, line);
                 continue;
             }
         }
@@ -178,8 +180,7 @@ int main() {
         auto chunk = Compiler::compile(tokens, line);
         {
             if (!chunk.has_value()) {
-                const auto& report = chunk.error();
-                write_report(out, line, report);
+                chunk.error().write(out, line);
                 continue;
             }
             if (config.print_chunks) print_chunk(out, *chunk);
