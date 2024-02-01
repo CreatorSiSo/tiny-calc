@@ -113,6 +113,15 @@ struct UnicodeScalars {
     std::optional<UnicodeScalar> m_next;
 };
 
+/**
+ * @brief Approximate width of the input when decoded as utf8 and displayed.
+ *
+ * Does not properly handle graphemes that use more than one unicode scalar,
+ * or have a display width larger than one. (Emojis like this: 🫵🏿, ...)
+ *
+ * @param string Utf8 encoded input.
+ * @return Amount of unicode scalars.
+ */
 constexpr auto utf8_width(std::string_view string) -> size_t {
     size_t amount = 0;
 

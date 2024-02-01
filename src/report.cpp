@@ -5,15 +5,15 @@
 
 #include "print.hpp"
 
-Span::Span(size_t start_val, size_t len_val) : start(start_val), len(len_val) {}
+Span::Span(size_t start, size_t length) : start(start), length(length) {}
 
 auto Span::debug() const -> std::string {
-    return std::format("{}..{}", start, start + len);
+    return std::format("{}..{}", start, start + length);
 }
 
 auto Span::source(std::string_view source) const -> std::string_view {
     assert(start >= 0);
-    return std::string_view(source.substr(start, len));
+    return std::string_view(source.substr(start, length));
 }
 
 Report::Report(ReportKind kind, std::string message)
@@ -24,13 +24,15 @@ Report::Report(ReportKind kind, std::string message, std::vector<Span> spans)
 
 Report::Report(
     ReportKind kind, std::string message, std::vector<Span> spans,
-    std::vector<std::pair<ReportKind, std::string>> notes
+    std::vector<std::pair<ReportKind, std::string>> comments
 )
-    : kind(kind), message(message), spans(spans), comments(notes) {}
+    : kind(kind), message(message), spans(spans), comments(comments) {}
 
-static auto repeat(std::string_view value, uint32_t amount) -> std::string {
+static auto repeat_string(std::string_view value, uint32_t times)
+    -> std::string {
     std::string result;
-    for (uint32_t i = 0; i < amount; i += 1) {
+    result.reserve(value.size() * times);
+    for (uint32_t i = 0; i < times; i += 1) {
         result.append(value);
     }
     return result;
@@ -50,7 +52,7 @@ auto Report::kind_to_string(ReportKind kind) -> std::string_view {
 void write_report(std::ostream& out, std::string_view input, Report report) {
     // largest start of all spans
     size_t smallest_start = 0;
-    std::string underlines(input.size(), ' ');
+    std::string underlines(utf8_width(input), ' ');
 
     for (Span span : report.spans) {
         auto [start, length] = span;
@@ -60,7 +62,8 @@ void write_report(std::ostream& out, std::string_view input, Report report) {
         size_t width_span = utf8_width(span.source(input));
 
         underlines.replace(
-            width_start, length, repeat("^", std::max(width_span, (size_t)1))
+            width_start, length,
+            repeat_string("^", std::max(width_span, (size_t)1))
         );
     }
 

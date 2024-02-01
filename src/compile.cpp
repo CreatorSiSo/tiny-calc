@@ -136,7 +136,7 @@ Compiler::TokenStream::TokenStream(std::span<const Token> tokens)
     size_t last_index = 0;
     if (!m_tokens.empty()) {
         Span last_span = m_tokens.back().span;
-        last_index = last_span.start + last_span.len;
+        last_index = last_span.start + last_span.length;
     }
     m_end_of_input.span.start = last_index;
 }
