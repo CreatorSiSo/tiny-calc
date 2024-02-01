@@ -2,9 +2,9 @@
 #include <cmath>
 #include <locale>
 
-#include "common.hpp"
 #include "compile.hpp"
 #include "interpret.hpp"
+#include "print.hpp"
 #include "report.hpp"
 #include "tokenize.hpp"
 

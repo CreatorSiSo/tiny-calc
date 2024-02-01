@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "common.hpp"
+#include "print.hpp"
 
 struct Stack {
     auto push(Number value) -> void { m_data.push_back(value); }

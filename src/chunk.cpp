@@ -1,6 +1,6 @@
 #include "chunk.hpp"
 
-#include "common.hpp"
+#include "print.hpp"
 
 auto opcode_to_string(OpCode opcode) -> std::string_view {
     switch (opcode) {
