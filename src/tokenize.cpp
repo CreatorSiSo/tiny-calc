@@ -47,10 +47,10 @@ static auto validate_whitespace(string_view source) -> size_t {
 
 /**
  * @brief Try to consume as many characters, of this syntax:
- * `
- *   digit ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
- *   number ::= digit (digit | "_")* ("." (digit | "_")*)?;
- * `
+ * ```
+ * digit ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
+ * number ::= digit (digit | "_")* ("." (digit | "_")*)?;
+ * ```
  * @param source Slice of the input string that is to be checked.
  * @return Length, in bytes, of the consumed characters.
  */
