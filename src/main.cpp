@@ -71,12 +71,12 @@ static void print_tokens(
 }
 
 static void print_chunk(ostream& out, const Chunk chunk) {
-    const auto& op_codes = chunk.op_codes();
+    const auto& opcodes = chunk.opcodes();
     const auto& literals = chunk.literals();
 
     writeln(out, "OpCodes:");
-    for (size_t i = 0; i < op_codes.size(); i += 1) {
-        writeln(out, "{}[{}] {}", INDENT, i, op_code_to_string(op_codes[i]));
+    for (size_t i = 0; i < opcodes.size(); i += 1) {
+        writeln(out, "{}[{}] {}", INDENT, i, opcode_to_string(opcodes[i]));
     }
     writeln(out, "Literals:");
     for (size_t i = 0; i < literals.size(); i += 1) {

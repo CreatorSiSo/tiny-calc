@@ -1,7 +1,7 @@
 #include "chunk.hpp"
 
-auto op_code_to_string(OpCode op_code) -> string_view {
-    switch (op_code) {
+auto opcode_to_string(OpCode opcode) -> string_view {
+    switch (opcode) {
         case OpCode::Add:
             return "Add";
         case OpCode::Sub:
@@ -17,12 +17,12 @@ auto op_code_to_string(OpCode op_code) -> string_view {
         case OpCode::Literal:
             return "Literal";
         default:
-            panic("OpCode[{}] not covered", static_cast<uint8_t>(op_code));
+            panic("OpCode[{}] not covered", static_cast<uint8_t>(opcode));
     }
 }
 
-Chunk::Chunk(vector<OpCode>&& op_codes, vector<Number>&& literals)
-    : m_op_codes(std::move(op_codes)), m_literals(std::move(literals)) {}
+Chunk::Chunk(vector<OpCode>&& opcodes, vector<Number>&& literals)
+    : m_opcodes(std::move(opcodes)), m_literals(std::move(literals)) {}
 
-auto Chunk::op_codes() const -> const vector<OpCode>& { return m_op_codes; }
+auto Chunk::opcodes() const -> const vector<OpCode>& { return m_opcodes; }
 auto Chunk::literals() const -> const vector<Number>& { return m_literals; }

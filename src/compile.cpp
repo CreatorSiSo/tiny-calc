@@ -15,11 +15,11 @@ auto Compiler::compile(vector<Token>&& tokens, string_view source)
 
     // opcodes and literals are pushed back in reverse order,
     // reversing them puts them in the correct order for execution
-    std::reverse(compiler.m_op_codes.begin(), compiler.m_op_codes.end());
+    std::reverse(compiler.m_opcodes.begin(), compiler.m_opcodes.end());
     std::reverse(compiler.m_literals.begin(), compiler.m_literals.end());
 
     return Chunk(
-        std::move(compiler.m_op_codes), std::move(compiler.m_literals)
+        std::move(compiler.m_opcodes), std::move(compiler.m_literals)
     );
 }
 
@@ -82,7 +82,7 @@ auto Compiler::compile_expr() -> std::optional<Report> {
         const auto result = parse_number(token.span, m_source);
         if (!result.has_value()) return result.error();
 
-        m_op_codes.push_back(OpCode::Literal);
+        m_opcodes.push_back(OpCode::Literal);
         m_literals.push_back(*result);
         return {};
     }
@@ -92,16 +92,16 @@ auto Compiler::compile_expr() -> std::optional<Report> {
 
         // Constants
         if (ident == "π" || ident == "pi") {
-            m_op_codes.push_back(OpCode::Literal);
+            m_opcodes.push_back(OpCode::Literal);
             m_literals.push_back(M_PIf64);
             return {};
         }
 
         // Functions
         if (ident == "cos" || ident == "c") {
-            m_op_codes.push_back(OpCode::Cos);
+            m_opcodes.push_back(OpCode::Cos);
         } else if (ident == "sin" || ident == "s") {
-            m_op_codes.push_back(OpCode::Sin);
+            m_opcodes.push_back(OpCode::Sin);
         } else {
             return Report(
                 ReportKind::Error,
@@ -114,8 +114,8 @@ auto Compiler::compile_expr() -> std::optional<Report> {
         return {};
     }
 
-    if (auto op_code = kind_to_binary_op(token.kind)) {
-        m_op_codes.push_back(*op_code);
+    if (auto opcode = kind_to_binary_op(token.kind)) {
+        m_opcodes.push_back(*opcode);
 
         if (auto report_lhs = compile_expr()) return report_lhs;
         if (auto report_lhs = compile_expr()) return report_lhs;

@@ -26,6 +26,6 @@ struct Compiler {
     vector<Token> m_tokens;
 
     size_t m_current = 0;
-    vector<OpCode> m_op_codes = {};
+    vector<OpCode> m_opcodes = {};
     vector<Number> m_literals = {};
 };

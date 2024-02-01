@@ -18,8 +18,8 @@ auto interpret(const Chunk& chunk) -> Number {
     Stack stack;
     size_t literal_index = 0;
 
-    for (OpCode op_code : chunk.op_codes()) {
-        switch (op_code) {
+    for (OpCode opcode : chunk.opcodes()) {
+        switch (opcode) {
             case OpCode::Literal:
                 stack.push(chunk.literals().at(literal_index));
                 literal_index += 1;
@@ -43,7 +43,7 @@ auto interpret(const Chunk& chunk) -> Number {
                 stack.push(std::sin(stack.pop()));
                 break;
             default:
-                panic("Unkown opcode <{}>", (uint8_t)op_code);
+                panic("Unkown opcode <{}>", (uint8_t)opcode);
                 break;
         }
     }
