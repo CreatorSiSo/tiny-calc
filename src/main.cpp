@@ -18,25 +18,68 @@ constexpr const char* INDENT = "    ";
 static void write_help(ostream& out) {
     write(
         out,
-        ":help     Print command help\n"
-        ":quit     Exit calculator (or press CTRL+C)\n"
-        ":tokens   Toggle printing token streams\n"
-        ":chunks   Toggle printing compiled chunks\n"
+        ":help, :?      Print command help\n"
+        ":examples      Print expression examples\n"
+        ":quit, :exit   Exit calculator (or press CTRL+C)\n"
+        ":tokens        Toggle printing token streams\n"
+        ":chunks        Toggle printing compiled chunks\n"
+    );
+}
+
+static void write_examples(ostream& out) {
+    write(
+        out,
+        " ╭── Addition\n"
+        " │  >> + 1 2\n"
+        " │  3\n"
+        " │  >> + 10.2 - 0 0.2\n"
+        " │  10\n"
+        "─╯\n"
+        " ╭── Subtraction\n"
+        " │  >> - 2 1\n"
+        " │  1\n"
+        "─╯\n"
+        " ╭── Multiplication\n"
+        " │  >> * 5 0.4\n"
+        " │  2\n"
+        "─╯\n"
+        " ╭── Division\n"
+        " │  >> / 1 2\n"
+        " │  0.5\n"
+        "─╯\n"
+        " ╭── Functions\n"
+        " │  >> sin 0\n"
+        " │  0\n"
+        " │  >> cos 0\n"
+        " │  1\n"
+        "─╯\n"
+        " ╭── Constants\n"
+        " │  >> pi\n"
+        " │  3.141592653589793\n"
+        " │  >> π\n"
+        " │  3.141592653589793\n"
+        " │  >> * 2 pi\n"
+        " │  6.283185307179586\n"
+        " │  >> cos * 2 π\n"
+        " │  1\n"
+        "─╯\n"
     );
 }
 
 static void run_command(string_view name, Config& config, ostream& out) {
     if (name == "help")
         write_help(out);
+    else if (name == "examples")
+        write_examples(out);
     else if (name == "tokens")
         config.print_tokens = !config.print_tokens;
     else if (name == "chunks")
         config.print_chunks = !config.print_chunks;
-    else if (name == "quit")
+    else if (name == "quit" || name == "exit")
         exit(0);
     else {
-        writeln(out, "Error: Unkown command '{}'", name);
-        writeln(out, "Note: Type :help for a list of valid commands");
+        writeln(out, "Error: Unkown command <:{}>", name);
+        writeln(out, "Note: Type <:help> for a list of valid commands");
     }
 }
 
@@ -45,7 +88,7 @@ enum class InputEnd {
     Eof,
 };
 
-static InputEnd get_input(istream& in, string& line) {
+static auto get_input(istream& in, string& line) -> InputEnd {
     line.clear();
 
     while (true) {
