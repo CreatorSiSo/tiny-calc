@@ -7,7 +7,7 @@ using Number = double;
 /**
  * @brief Operations/Instructions to be executed by the interpreter.
  */
-enum class OpCode {
+enum class OpCode : uint8_t {
     /// pop A, pop B, push A + B
     Add,
     /// pop A, pop B, push A - B

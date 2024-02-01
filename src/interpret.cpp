@@ -43,7 +43,7 @@ auto interpret(const Chunk& chunk) -> Number {
                 stack.push(std::sin(stack.pop()));
                 break;
             default:
-                panic("Unkown opcode <{}>", (uint8_t)opcode);
+                panic("Unkown opcode <{}>", static_cast<uint8_t>(opcode));
                 break;
         }
     }

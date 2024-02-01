@@ -2,7 +2,7 @@
 
 #include "common.hpp"
 
-enum class UnitKind {
+enum class UnitKind : int8_t {
     Invalid = -2,
     Follow = -1,
     One = 1,
@@ -115,7 +115,7 @@ constexpr auto utf8_width(string_view string) -> size_t {
 
     for (auto _ : UnicodeScalars(string)) {
         // noop to silence unused variable warning
-        (void)_;
+        static_cast<void>(_);
         amount += 1;
     }
 
