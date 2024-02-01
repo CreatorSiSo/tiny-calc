@@ -130,7 +130,7 @@ int main() {
             }
         }
 
-        auto chunk = Compiler::compile(tokens, line);
+        auto chunk = compile(tokens, line);
         {
             if (!chunk.has_value()) {
                 const auto& report = chunk.error();
