@@ -13,7 +13,7 @@ struct Config {
     bool print_chunks;
 };
 
-constexpr auto INDENT = "    ";
+constexpr const char* INDENT = "    ";
 
 static void write_help(ostream& out) {
     write(
@@ -130,7 +130,7 @@ int main() {
             }
         }
 
-        auto chunk = Compiler::compile(std::move(tokens), line);
+        auto chunk = Compiler::compile(tokens, line);
         {
             if (!chunk.has_value()) {
                 const auto& report = chunk.error();

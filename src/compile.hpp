@@ -28,21 +28,21 @@ struct Compiler {
      * @param source Input used to generate the tokens.
      * @return Compiled chunk or an error.
      */
-    static auto compile(vector<Token>&& tokens, string_view source)
+    static auto compile(std::span<const Token> tokens, string_view source)
         -> std::expected<Chunk, Report>;
 
    private:
     struct TokenStream {
-        TokenStream(vector<Token>&& tokens);
+        TokenStream(std::span<const Token> tokens);
         auto next() -> const Token&;
         auto expect(TokenKind expected_kind) -> std::optional<Report>;
 
        private:
-        vector<Token> m_tokens;
-        size_t m_current = 0;
+        std::span<const Token> m_tokens;
+        Token m_end_of_input;
     };
 
-    Compiler(vector<Token>&& tokens, string_view source);
+    Compiler(std::span<const Token> tokens, string_view source);
 
     auto compile_expr() -> std::optional<Report>;
     void compile_literal(Number value);

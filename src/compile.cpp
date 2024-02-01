@@ -4,9 +4,9 @@
 #include <cmath>
 #include <ranges>
 
-auto Compiler::compile(vector<Token>&& tokens, string_view source)
+auto Compiler::compile(std::span<const Token> tokens, string_view source)
     -> std::expected<Chunk, Report> {
-    Compiler compiler(std::move(tokens), source);
+    Compiler compiler(tokens, source);
 
     if (const auto report = compiler.compile_expr())
         return std::unexpected(*report);
@@ -21,8 +21,8 @@ auto Compiler::compile(vector<Token>&& tokens, string_view source)
     return Chunk(std::move(compiler.m_opcodes), std::move(compiler.m_literals));
 }
 
-Compiler::Compiler(vector<Token>&& tokens, string_view source)
-    : m_source(source), m_tokens(TokenStream(std::move(tokens))) {}
+Compiler::Compiler(std::span<const Token> tokens, string_view source)
+    : m_source(source), m_tokens(TokenStream(tokens)) {}
 
 static auto parse_number(Span span, string_view source)
     -> std::expected<Number, Report> {
@@ -128,26 +128,27 @@ auto Compiler::compile_binary(OpCode opcode) -> std::optional<Report> {
     return {};
 }
 
-Compiler::TokenStream::TokenStream(vector<Token>&& tokens) : m_tokens(tokens) {
+Compiler::TokenStream::TokenStream(std::span<const Token> tokens)
+    : m_tokens(tokens),
+      m_end_of_input(Token(TokenKind::EndOfInput, Span(0, 0))) {
     // Index of last character of last token
-    size_t end = 0;
+    size_t last_index = 0;
     if (!m_tokens.empty()) {
         Span last_span = m_tokens.back().span;
-        end = last_span.start + last_span.len;
+        last_index = last_span.start + last_span.len;
     }
-
-    m_tokens.push_back(Token(TokenKind::EndOfInput, Span(end, 0)));
+    m_end_of_input.span.start = last_index;
 }
 
 auto Compiler::TokenStream::next() -> const Token& {
-    if (m_current < m_tokens.size()) {
-        const Token& result = m_tokens.at(m_current);
-        m_current += 1;
-        return result;
+    if (m_tokens.empty()) {
+        // last token is always the end of file token (see constructor)
+        return m_end_of_input;
     }
 
-    // last token is always the end of file token (see constructor)
-    return m_tokens.back();
+    const Token& token = *m_tokens.begin();
+    m_tokens = m_tokens.subspan(1);
+    return token;
 }
 
 auto Compiler::TokenStream::expect(TokenKind expected_kind)
