@@ -18,9 +18,12 @@ struct Compiler {
     Compiler(vector<Token>&& tokens, string_view source);
 
     auto compile_expr() -> std::optional<Report>;
+    void compile_literal(Number value);
+    auto compile_unary(OpCode opcode) -> std::optional<Report>;
+    auto compile_binary(OpCode opcode) -> std::optional<Report>;
 
-    auto next() -> const Token&;
-    auto expect(TokenKind expected_kind) -> std::optional<Report>;
+    auto next_token() -> const Token&;
+    auto expect_token(TokenKind expected_kind) -> std::optional<Report>;
 
     const string_view m_source;
     vector<Token> m_tokens;

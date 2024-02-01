@@ -10,7 +10,7 @@ auto Compiler::compile(vector<Token>&& tokens, string_view source)
 
     if (const auto report = compiler.compile_expr())
         return std::unexpected(*report);
-    if (const auto report = compiler.expect(TokenKind::EndOfInput))
+    if (const auto report = compiler.expect_token(TokenKind::EndOfInput))
         return std::unexpected(*report);
 
     // opcodes and literals are pushed back in reverse order,
@@ -18,9 +18,7 @@ auto Compiler::compile(vector<Token>&& tokens, string_view source)
     std::reverse(compiler.m_opcodes.begin(), compiler.m_opcodes.end());
     std::reverse(compiler.m_literals.begin(), compiler.m_literals.end());
 
-    return Chunk(
-        std::move(compiler.m_opcodes), std::move(compiler.m_literals)
-    );
+    return Chunk(std::move(compiler.m_opcodes), std::move(compiler.m_literals));
 }
 
 Compiler::Compiler(vector<Token>&& tokens, string_view source)
@@ -73,18 +71,20 @@ static auto kind_to_binary_op(TokenKind kind) -> std::optional<OpCode> {
     }
 }
 
-/// @brief Parses tokens into an ast of expressions, mutates Parser.
-/// @return Pointer to an upcasted expression tree.
+/**
+ * @brief Parses tokens into an ast of expressions, mutates Parser.
+ * @return Pointer to an upcasted expression tree.
+ */
 auto Compiler::compile_expr() -> std::optional<Report> {
-    const Token& token = next();
+    const Token& token = next_token();
 
     if (token.kind == TokenKind::Number) {
         const auto result = parse_number(token.span, m_source);
-        if (!result.has_value()) return result.error();
-
-        m_opcodes.push_back(OpCode::Literal);
-        m_literals.push_back(*result);
-        return {};
+        if (result.has_value()) {
+            compile_literal(result.value());
+            return {};
+        }
+        return result.error();
     }
 
     if (token.kind == TokenKind::Identifier) {
@@ -92,36 +92,25 @@ auto Compiler::compile_expr() -> std::optional<Report> {
 
         // Constants
         if (ident == "π" || ident == "pi") {
-            m_opcodes.push_back(OpCode::Literal);
-            m_literals.push_back(M_PIf64);
+            compile_literal(M_PIf64);
             return {};
         }
 
         // Functions
-        if (ident == "cos" || ident == "c") {
-            m_opcodes.push_back(OpCode::Cos);
-        } else if (ident == "sin" || ident == "s") {
-            m_opcodes.push_back(OpCode::Sin);
-        } else {
-            return Report(
-                ReportKind::Error,
-                std::format("Unknown function or constant <{}>", ident),
-                {token.span}
-            );
-        }
+        if (ident == "cos" || ident == "c")
+            return compile_unary(OpCode::Cos);
+        else if (ident == "sin" || ident == "s")
+            return compile_unary(OpCode::Sin);
 
-        if (auto report = compile_expr()) return report;
-        return {};
+        return Report(
+            ReportKind::Error,
+            std::format("Unknown function or constant <{}>", ident),
+            {token.span}
+        );
     }
 
-    if (auto opcode = kind_to_binary_op(token.kind)) {
-        m_opcodes.push_back(*opcode);
-
-        if (auto report_lhs = compile_expr()) return report_lhs;
-        if (auto report_lhs = compile_expr()) return report_lhs;
-
-        return {};
-    }
+    if (auto opcode = kind_to_binary_op(token.kind))
+        return compile_binary(*opcode);
 
     return Report(
         ReportKind::Error,
@@ -130,7 +119,25 @@ auto Compiler::compile_expr() -> std::optional<Report> {
     );
 }
 
-auto Compiler::next() -> const Token& {
+void Compiler::compile_literal(Number value) {
+    m_opcodes.push_back(OpCode::Literal);
+    m_literals.push_back(value);
+}
+
+auto Compiler::compile_unary(OpCode opcode) -> std::optional<Report> {
+    m_opcodes.push_back(opcode);
+    if (auto report = compile_expr()) return report;
+    return {};
+}
+
+auto Compiler::compile_binary(OpCode opcode) -> std::optional<Report> {
+    m_opcodes.push_back(opcode);
+    if (auto report_lhs = compile_expr()) return report_lhs;
+    if (auto report_lhs = compile_expr()) return report_lhs;
+    return {};
+}
+
+auto Compiler::next_token() -> const Token& {
     if (m_current < m_tokens.size()) {
         const Token& result = m_tokens.at(m_current);
         m_current += 1;
@@ -141,8 +148,8 @@ auto Compiler::next() -> const Token& {
     return m_tokens.back();
 }
 
-auto Compiler::expect(TokenKind expected_kind) -> std::optional<Report> {
-    auto& token = next();
+auto Compiler::expect_token(TokenKind expected_kind) -> std::optional<Report> {
+    auto& token = next_token();
     if (token.kind == expected_kind) return {};
     return Report(
         ReportKind::Error,

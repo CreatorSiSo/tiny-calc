@@ -1,0 +1,39 @@
+# Tests
+
+## Addition chain
+
+```
+Welcome to tiny-calc!
+Type :help when you are lost =)
+>> :chunks
+>> :tokens
+>> + 1 + 2 + 3 + 4 5
+Tokens:
+    Plus[+] 0..1
+    Number[1] 2..3
+    Plus[+] 4..5
+    Number[2] 6..7
+    Plus[+] 8..9
+    Number[3] 10..11
+    Plus[+] 12..13
+    Number[4] 14..15
+    Number[5] 16..17
+OpCodes:
+    [0] Literal
+    [1] Literal
+    [2] Add
+    [3] Literal
+    [4] Add
+    [5] Literal
+    [6] Add
+    [7] Literal
+    [8] Add
+Literals:
+    [0] 5
+    [1] 4
+    [2] 3
+    [3] 2
+    [4] 1
+15
+>>
+```
