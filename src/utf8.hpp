@@ -1,6 +1,9 @@
 #pragma once
 
-#include "common.hpp"
+#include <array>
+#include <cstdint>
+#include <optional>
+#include <string_view>
 
 enum class UnitKind : int8_t {
     Invalid = -2,
@@ -29,7 +32,7 @@ struct UnicodeScalar {
 };
 
 struct UnicodeScalars {
-    constexpr UnicodeScalars(string_view string) : m_data(string) {
+    constexpr UnicodeScalars(std::string_view string) : m_data(string) {
         m_next = utf8_decode_scalar(m_data);
     }
 
@@ -51,7 +54,7 @@ struct UnicodeScalars {
     }
 
    private:
-    constexpr static auto utf8_decode_scalar(string_view string)
+    constexpr static auto utf8_decode_scalar(std::string_view string)
         -> std::optional<UnicodeScalar> {
         if (string.empty()) return {};
 
@@ -106,11 +109,11 @@ struct UnicodeScalars {
     }
 
    private:
-    string_view m_data;
+    std::string_view m_data;
     std::optional<UnicodeScalar> m_next;
 };
 
-constexpr auto utf8_width(string_view string) -> size_t {
+constexpr auto utf8_width(std::string_view string) -> size_t {
     size_t amount = 0;
 
     for (auto _ : UnicodeScalars(string)) {

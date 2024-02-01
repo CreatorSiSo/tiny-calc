@@ -1,9 +1,9 @@
 #pragma once
 
 #include <expected>
+#include <span>
 
 #include "chunk.hpp"
-#include "common.hpp"
 #include "tokenize.hpp"
 
 /**
@@ -28,7 +28,7 @@ struct Compiler {
      * @param source Input used to generate the tokens.
      * @return Compiled chunk or an error.
      */
-    static auto compile(std::span<const Token> tokens, string_view source)
+    static auto compile(std::span<const Token> tokens, std::string_view source)
         -> std::expected<Chunk, Report>;
 
    private:
@@ -42,15 +42,15 @@ struct Compiler {
         Token m_end_of_input;
     };
 
-    Compiler(std::span<const Token> tokens, string_view source);
+    Compiler(std::span<const Token> tokens, std::string_view source);
 
     auto compile_expr() -> std::optional<Report>;
     void compile_literal(Number value);
     auto compile_unary(OpCode opcode) -> std::optional<Report>;
     auto compile_binary(OpCode opcode) -> std::optional<Report>;
 
-    const string_view m_source;
+    const std::string_view m_source;
     TokenStream m_tokens;
-    vector<OpCode> m_opcodes = {};
-    vector<Number> m_literals = {};
+    std::vector<OpCode> m_opcodes = {};
+    std::vector<Number> m_literals = {};
 };

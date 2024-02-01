@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "common.hpp"
+
 struct Stack {
     auto push(Number value) -> void { m_data.push_back(value); }
     auto pop() -> Number {
@@ -11,7 +13,7 @@ struct Stack {
     }
 
    private:
-    vector<Number> m_data;
+    std::vector<Number> m_data;
 };
 
 auto interpret(const Chunk& chunk) -> Number {

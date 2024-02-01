@@ -1,6 +1,8 @@
 #include "chunk.hpp"
 
-auto opcode_to_string(OpCode opcode) -> string_view {
+#include "common.hpp"
+
+auto opcode_to_string(OpCode opcode) -> std::string_view {
     switch (opcode) {
         case OpCode::Add:
             return "Add";
@@ -21,8 +23,10 @@ auto opcode_to_string(OpCode opcode) -> string_view {
     }
 }
 
-Chunk::Chunk(vector<OpCode>&& opcodes, vector<Number>&& literals)
+Chunk::Chunk(std::vector<OpCode>&& opcodes, std::vector<Number>&& literals)
     : m_opcodes(std::move(opcodes)), m_literals(std::move(literals)) {}
 
-auto Chunk::opcodes() const -> const vector<OpCode>& { return m_opcodes; }
-auto Chunk::literals() const -> const vector<Number>& { return m_literals; }
+auto Chunk::opcodes() const -> const std::vector<OpCode>& { return m_opcodes; }
+auto Chunk::literals() const -> const std::vector<Number>& {
+    return m_literals;
+}

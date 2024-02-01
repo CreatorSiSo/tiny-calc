@@ -1,21 +1,11 @@
 #pragma once
 
-#include <cstdint>
 #include <format>
 #include <iostream>
 #include <source_location>
-#include <vector>
-
-template <typename T>
-using vector = std::vector<T>;
-
-using string = std::string;
-using string_view = std::string_view;
-using ostream = std::ostream;
-using istream = std::istream;
 
 /**
- * @brief Formats and prints the provided message.
+ * @brief Formats and writes the provided message.
  *
  * Does not flush the output stream.
  * See `std::format` on how formatting works. (in the <format> header)
@@ -26,7 +16,7 @@ using istream = std::istream;
  */
 template <typename... Args>
 inline void write(
-    ostream& out, std::format_string<Args&...> fmt, Args&&... args
+    std::ostream& out, std::format_string<Args&...> fmt, Args&&... args
 ) {
     out << std::format(fmt, args...);
 }
@@ -43,7 +33,7 @@ inline void write(
  */
 template <typename... Args>
 inline void writeln(
-    ostream& out, std::format_string<Args&...> fmt, Args&&... args
+    std::ostream& out, std::format_string<Args&...> fmt, Args&&... args
 ) {
     out << std::format(fmt, args...) << "\n";
 }
@@ -68,7 +58,7 @@ struct PanicFormat {
 };
 
 /**
- * @brief Writes the provided message to stderr and aborts.
+ * @brief Formats and writes the provided message to stderr, then aborts.
  *
  * Flushes the output stream.
  * See `std::format` on how formatting works. (in the <format> header)

@@ -15,7 +15,7 @@ struct Config {
 
 constexpr const char* INDENT = "    ";
 
-static void write_help(ostream& out) {
+static void write_help(std::ostream& out) {
     write(
         out,
         ":help, :?      Print command help\n"
@@ -26,7 +26,7 @@ static void write_help(ostream& out) {
     );
 }
 
-static void write_examples(ostream& out) {
+static void write_examples(std::ostream& out) {
     write(
         out,
         " ╭── Addition\n"
@@ -66,7 +66,9 @@ static void write_examples(ostream& out) {
     );
 }
 
-static void run_command(string_view name, Config& config, ostream& out) {
+static void run_command(
+    std::string_view name, Config& config, std::ostream& out
+) {
     if (name == "help")
         write_help(out);
     else if (name == "examples")
@@ -88,7 +90,7 @@ enum class InputEnd {
     Eof,
 };
 
-static auto get_input(istream& in, string& line) -> InputEnd {
+static auto get_input(std::istream& in, std::string& line) -> InputEnd {
     line.clear();
 
     while (true) {
@@ -102,7 +104,7 @@ static auto get_input(istream& in, string& line) -> InputEnd {
 }
 
 static void print_tokens(
-    ostream& out, const vector<Token> tokens, string_view source
+    std::ostream& out, const std::vector<Token> tokens, std::string_view source
 ) {
     writeln(out, "Tokens:");
     for (const auto& token : tokens) {
@@ -113,7 +115,7 @@ static void print_tokens(
     }
 }
 
-static void print_chunk(ostream& out, const Chunk chunk) {
+static void print_chunk(std::ostream& out, const Chunk chunk) {
     const auto& opcodes = chunk.opcodes();
     const auto& literals = chunk.literals();
 
@@ -128,14 +130,14 @@ static void print_chunk(ostream& out, const Chunk chunk) {
 }
 
 int main() {
-    istream& in = std::cin;
-    ostream& out = std::cout;
+    std::istream& in = std::cin;
+    std::ostream& out = std::cout;
 
     Config config{
         .print_tokens = false,
         .print_chunks = false,
     };
-    string line;
+    std::string line;
 
     // Read evaluate print loop (repl)
     writeln(out, "Welcome to tiny-calc!\nType :help when you are lost =)");
@@ -158,13 +160,13 @@ int main() {
         {
             if (config.print_tokens) print_tokens(out, tokens, line);
 
-            vector<Span> error_spans;
+            std::vector<Span> error_spans;
             for (auto& token : tokens) {
                 if (token.kind == TokenKind::Error)
                     error_spans.push_back(token.span);
             }
             if (!error_spans.empty()) {
-                string message =
+                std::string message =
                     error_spans.size() > 1 ? "Invalid Tokens" : "Invalid Token";
                 write_report(
                     out, line, Report(ReportKind::Error, message, error_spans)

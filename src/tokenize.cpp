@@ -2,9 +2,9 @@
 
 #include <cctype>
 
-#include "utf8.hpp"
+#include "common.hpp"
 
-auto Token::name() const -> string_view {
+auto Token::name() const -> std::string_view {
     switch (kind) {
         case TokenKind::Identifier:
             return "Identifier";
@@ -23,11 +23,11 @@ auto Token::name() const -> string_view {
         case TokenKind::EndOfInput:
             return "EndOfInput";
         default:
-            panic("Case <{}> not covered", (uint8_t)kind);
+            panic("Case <{}> not covered", static_cast<uint8_t>(kind));
     }
 }
 
-auto Token::source(string_view src) const -> string_view {
+auto Token::source(std::string_view src) const -> std::string_view {
     return span.source(src);
 }
 
@@ -36,7 +36,7 @@ auto Token::source(string_view src) const -> string_view {
  * @param source Slice of the input string that is to be checked.
  * @return Length, in bytes, of the consumed characters.
  */
-static auto validate_whitespace(string_view source) -> size_t {
+static auto validate_whitespace(std::string_view source) -> size_t {
     size_t len = 0;
     for (char chr : source) {
         if (!std::isspace(chr)) break;
@@ -54,7 +54,7 @@ static auto validate_whitespace(string_view source) -> size_t {
  * @param source Slice of the input string that is to be checked.
  * @return Length, in bytes, of the consumed characters.
  */
-static auto validate_number(string_view source) -> size_t {
+static auto validate_number(std::string_view source) -> size_t {
     if (!std::isdigit(source.at(0))) return 0;
 
     size_t length = 1;
@@ -89,7 +89,7 @@ static auto validate_number(string_view source) -> size_t {
  * @param source Slice of the input string that is to be checked.
  * @return Length, in bytes, of the consumed characters.
  */
-static constexpr auto validate_identifier(string_view source) -> size_t {
+static constexpr auto validate_identifier(std::string_view source) -> size_t {
     size_t length_ident = 0;
 
     for (const auto& [scalar, length] : UnicodeScalars(source)) {
@@ -108,8 +108,8 @@ static constexpr auto validate_identifier(string_view source) -> size_t {
  * @param source Input source string.
  * @return All valid tokens and errors.
  */
-auto tokenize(string_view source) -> vector<Token> {
-    vector<Token> tokens;
+auto tokenize(std::string_view source) -> std::vector<Token> {
+    std::vector<Token> tokens;
     // Index to first character of current token
     size_t start = 0;
 

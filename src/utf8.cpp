@@ -1,7 +1,7 @@
 #include "utf8.hpp"
 
 static_assert([] {
-    std::array<string_view, 4> strings = {"兔", "€", "ß", "t"};
+    std::array<std::string_view, 4> strings = {"兔", "€", "ß", "t"};
     std::array<uint32_t, 4> scalars = {0x2F80F, 0x20AC, 0xDF, 0x74};
     std::array<int8_t, 4> lengths = {4, 3, 2, 1};
 

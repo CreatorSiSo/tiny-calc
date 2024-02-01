@@ -1,7 +1,6 @@
 #pragma once
 
 #include "chunk.hpp"
-#include "common.hpp"
 
 /**
  * @brief Evaluates a Chunk, by execution the opcodes.

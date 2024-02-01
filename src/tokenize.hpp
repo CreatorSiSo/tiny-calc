@@ -1,8 +1,6 @@
 #pragma once
 
-#include "common.hpp"
 #include "report.hpp"
-#include "utf8.hpp"
 
 enum class TokenKind {
     Identifier,
@@ -21,8 +19,8 @@ struct Token {
 
     Token(TokenKind kind_val, Span span_val) : kind(kind_val), span(span_val) {}
 
-    auto name() const -> string_view;
-    auto source(string_view src) const -> string_view;
+    auto name() const -> std::string_view;
+    auto source(std::string_view src) const -> std::string_view;
 };
 
-auto tokenize(string_view str) -> vector<Token>;
+auto tokenize(std::string_view str) -> std::vector<Token>;

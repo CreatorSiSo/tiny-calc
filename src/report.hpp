@@ -1,6 +1,8 @@
 #pragma once
 
-#include "common.hpp"
+#include <string>
+#include <vector>
+
 #include "utf8.hpp"
 
 struct Span {
@@ -9,8 +11,8 @@ struct Span {
 
     Span(size_t start_val, size_t len_val);
 
-    auto debug() const -> string;
-    auto source(string_view str) const -> string_view;
+    auto debug() const -> std::string;
+    auto source(std::string_view str) const -> std::string_view;
 };
 
 enum class ReportKind {
@@ -19,19 +21,19 @@ enum class ReportKind {
 };
 
 struct Report {
-    Report(ReportKind kind, string message);
-    Report(ReportKind kind, string message, vector<Span> spans);
+    Report(ReportKind kind, std::string message);
+    Report(ReportKind kind, std::string message, std::vector<Span> spans);
     Report(
-        ReportKind kind, string message, vector<Span> spans,
-        vector<std::pair<ReportKind, string>> notes
+        ReportKind kind, std::string message, std::vector<Span> spans,
+        std::vector<std::pair<ReportKind, std::string>> notes
     );
 
-    static auto kind_to_string(ReportKind kind) -> string_view;
+    static auto kind_to_string(ReportKind kind) -> std::string_view;
 
     const ReportKind kind;
-    const string message;
-    const vector<Span> spans;
-    const vector<std::pair<ReportKind, string>> comments;
+    const std::string message;
+    const std::vector<Span> spans;
+    const std::vector<std::pair<ReportKind, std::string>> comments;
 };
 
-void write_report(ostream& out, string_view input, Report report);
+void write_report(std::ostream& out, std::string_view input, Report report);

@@ -2,9 +2,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <format>
 #include <ranges>
 
-auto Compiler::compile(std::span<const Token> tokens, string_view source)
+auto Compiler::compile(std::span<const Token> tokens, std::string_view source)
     -> std::expected<Chunk, Report> {
     Compiler compiler(tokens, source);
 
@@ -21,19 +22,19 @@ auto Compiler::compile(std::span<const Token> tokens, string_view source)
     return Chunk(std::move(compiler.m_opcodes), std::move(compiler.m_literals));
 }
 
-Compiler::Compiler(std::span<const Token> tokens, string_view source)
+Compiler::Compiler(std::span<const Token> tokens, std::string_view source)
     : m_source(source), m_tokens(TokenStream(tokens)) {}
 
-static auto parse_number(Span span, string_view source)
+static auto parse_number(Span span, std::string_view source)
     -> std::expected<Number, Report> {
     auto filter_view = span.source(source) |
                        std::views::filter([](char c) { return c != '_'; });
-    string filtered(filter_view.begin(), filter_view.end());
+    std::string filtered(filter_view.begin(), filter_view.end());
 
     try {
         return std::stod(filtered);
     } catch (const std::out_of_range& _) {
-        std::pair<ReportKind, string> note = {
+        std::pair<ReportKind, std::string> note = {
             ReportKind::Note,
             std::format("{} is the maximum", std::numeric_limits<Number>::max())
         };
@@ -79,7 +80,7 @@ auto Compiler::compile_expr() -> std::optional<Report> {
     }
 
     if (token.kind == TokenKind::Identifier) {
-        string_view ident = token.source(m_source);
+        std::string_view ident = token.source(m_source);
 
         // Constants
         if (ident == "π" || ident == "pi") {

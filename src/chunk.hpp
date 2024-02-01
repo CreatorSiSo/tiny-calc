@@ -1,6 +1,8 @@
 #pragma once
 
-#include "common.hpp"
+#include <cstdint>
+#include <string_view>
+#include <vector>
 
 using Number = double;
 
@@ -29,18 +31,18 @@ enum class OpCode : uint8_t {
  * @param opcode The OpCode.
  * @return Name of the OpCode.
  */
-auto opcode_to_string(OpCode opcode) -> string_view;
+auto opcode_to_string(OpCode opcode) -> std::string_view;
 
 /**
  * @brief Represents valid, compiled output of an expression.
  */
 struct Chunk {
-    Chunk(vector<OpCode>&& m_opcodes, vector<Number>&& m_literals);
+    Chunk(std::vector<OpCode>&& m_opcodes, std::vector<Number>&& m_literals);
 
-    auto opcodes() const -> const vector<OpCode>&;
-    auto literals() const -> const vector<Number>&;
+    auto opcodes() const -> const std::vector<OpCode>&;
+    auto literals() const -> const std::vector<Number>&;
 
    private:
-    vector<OpCode> m_opcodes;
-    vector<Number> m_literals;
+    std::vector<OpCode> m_opcodes;
+    std::vector<Number> m_literals;
 };
