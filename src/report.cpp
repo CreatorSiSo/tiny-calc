@@ -62,9 +62,9 @@ static auto row_colum(std::string_view source, size_t index)
         if (c == '\n') row += 1;
     }
     size_t line_start = before_index.rfind('\n');
-    size_t column = utf8_width(before_index);
+    size_t column = utf8::width(before_index);
     if (line_start != std::string::npos) {
-        column = utf8_width(before_index.substr(line_start));
+        column = utf8::width(before_index.substr(line_start));
     }
 
     return {row, column};
@@ -73,11 +73,11 @@ static auto row_colum(std::string_view source, size_t index)
 static void write_source_block(
     std::ostream& out, std::string_view source, std::span<const Span> spans
 ) {
-    std::string underlines(utf8_width(source), ' ');
+    std::string underlines(utf8::width(source), ' ');
 
     for (Span span : spans) {
-        size_t width_start = utf8_width(Span(0, span.start).source(source));
-        size_t width_span = utf8_width(span.source(source));
+        size_t width_start = utf8::width(Span(0, span.start).source(source));
+        size_t width_span = utf8::width(span.source(source));
 
         underlines.replace(
             width_start, span.length,

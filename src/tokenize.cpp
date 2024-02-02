@@ -95,7 +95,7 @@ static auto validate_number(std::string_view source) -> size_t {
 static constexpr auto validate_identifier(std::string_view source) -> size_t {
     size_t length_ident = 0;
 
-    for (const auto& [scalar, length] : UnicodeScalars(source)) {
+    for (const auto& [scalar, length] : utf8::Scalars(source)) {
         if (std::iswspace(scalar) || std::iswpunct(scalar) ||
             std::iswdigit(scalar))
             break;

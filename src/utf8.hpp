@@ -5,6 +5,8 @@
 #include <optional>
 #include <string_view>
 
+namespace utf8 {
+
 enum class UnitKind : int8_t {
     Invalid = -2,
     Follow = -1,
@@ -14,52 +16,76 @@ enum class UnitKind : int8_t {
     Four = 4,
 };
 
+/**
+ * @brief Decoded data of a single UTF-8 unit (byte).
+ */
 struct Unit {
     UnitKind kind;
     uint8_t data;
 
     constexpr Unit(UnitKind kind, uint8_t data) : kind(kind), data(data) {}
 
+    /**
+     * @brief Amount of bytes (1 to 4) needed to encode the entire scalar.
+     *
+     * Length is one if the unit is not a valid start byte.
+     */
     constexpr auto length() -> uint8_t {
         if (kind == UnitKind::Follow || kind == UnitKind::Invalid) return 1;
         return static_cast<uint8_t>(kind);
     }
 };
 
-struct UnicodeScalar {
+/**
+ * @brief A single unicode scalar value and the amount of utf8 bytes it was
+ *        decoded from utf8.
+ *
+ * The length is always the amount of bytes that the scalar was decoded from.
+ * So a scalar of value U+FFFD (REPLACEMENT CHARACTER) might have any length
+ * from 1 to 4, as it is used when a decoding error is encountered.
+ */
+struct Scalar {
     uint32_t scalar;
     uint8_t length;
 };
 
-struct UnicodeScalars {
-    constexpr UnicodeScalars(std::string_view string) : m_data(string) {
-        m_next = utf8_decode_scalar(m_data);
+/**
+ * @brief Iterator over unicode scalars of a utf8 encoded `string_view`.
+ */
+struct Scalars {
+    constexpr Scalars(std::string_view string) : m_data(string) {
+        m_next = decode_scalar(m_data);
     }
 
-    constexpr auto begin() const -> UnicodeScalars { return *this; }
-    constexpr auto end() const -> UnicodeScalars { return UnicodeScalars(""); }
+    constexpr auto begin() const -> Scalars { return *this; }
+    constexpr auto end() const -> Scalars { return Scalars(""); }
 
-    constexpr auto operator*() const -> const UnicodeScalar& { return *m_next; }
+    constexpr auto operator*() const -> const Scalar& { return *m_next; }
 
-    constexpr auto operator++() -> UnicodeScalars& {
+    constexpr auto operator++() -> Scalars& {
         if (m_next) {
             m_data = m_data.substr(m_next->length);
-            m_next = utf8_decode_scalar(m_data);
+            m_next = decode_scalar(m_data);
         }
         return *this;
     }
 
-    constexpr auto operator!=(const UnicodeScalars& other) const -> bool {
+    constexpr auto operator!=(const Scalars& other) const -> bool {
         return m_data != other.m_data;
     }
 
    private:
-    constexpr static auto utf8_decode_scalar(std::string_view string)
-        -> std::optional<UnicodeScalar> {
+    /**
+     * @brief Decodes a unicode scalar from the first 1 to 4 bytes.
+     * @param string Input, that is going to be decoded.
+     * @return The decoded unicode scalar or nothing if `string` is empty.
+     */
+    constexpr static auto decode_scalar(std::string_view string)
+        -> std::optional<Scalar> {
         if (string.empty()) return {};
 
         constexpr uint32_t replacement_scalar = 0xFFFD;
-        auto start_unit = utf8_decode_unit(string[0]);
+        auto start_unit = decode_unit(string[0]);
         uint8_t length = start_unit.length();
         uint32_t scalar = start_unit.data;
 
@@ -68,7 +94,7 @@ struct UnicodeScalars {
             if (string.size() <= index)
                 return {{.scalar = replacement_scalar, .length = index}};
 
-            auto follow_unit = utf8_decode_unit(string[index]);
+            auto follow_unit = decode_unit(string[index]);
             if (follow_unit.kind != UnitKind::Follow)
                 return {{.scalar = replacement_scalar, .length = index}};
 
@@ -79,7 +105,12 @@ struct UnicodeScalars {
         return {{.scalar = scalar, .length = length}};
     }
 
-    constexpr static auto utf8_decode_unit(uint8_t byte) -> Unit {
+    /**
+     * @brief Reads the start bits and value stored in a single utf8 unit (byte)
+     * @param byte Byte to decode.
+     * @return Decoded data (value and length).
+     */
+    constexpr static auto decode_unit(uint8_t byte) -> Unit {
         // First bit is zero
         if ((byte >> 7) == 0b0) {
             return Unit(UnitKind::One, byte);
@@ -110,7 +141,7 @@ struct UnicodeScalars {
 
    private:
     std::string_view m_data;
-    std::optional<UnicodeScalar> m_next;
+    std::optional<Scalar> m_next;
 };
 
 /**
@@ -122,10 +153,10 @@ struct UnicodeScalars {
  * @param string Utf8 encoded input.
  * @return Amount of unicode scalars.
  */
-constexpr auto utf8_width(std::string_view string) -> size_t {
+constexpr auto width(std::string_view string) -> size_t {
     size_t amount = 0;
 
-    for (auto _ : UnicodeScalars(string)) {
+    for (auto _ : Scalars(string)) {
         // noop to silence unused variable warning
         static_cast<void>(_);
         amount += 1;
@@ -133,3 +164,5 @@ constexpr auto utf8_width(std::string_view string) -> size_t {
 
     return amount;
 }
+
+}  // namespace utf8

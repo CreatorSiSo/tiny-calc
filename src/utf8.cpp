@@ -6,15 +6,15 @@ static_assert([] {
     std::array<int8_t, 4> lengths = {4, 3, 2, 1};
 
     for (size_t i = 0; i < strings.size(); i += 1) {
-        auto [scalar, length] = *UnicodeScalars(strings[i]);
+        auto [scalar, length] = *utf8::Scalars(strings[i]);
         if (scalar != scalars[i]) return false;
         if (length != lengths[i]) return false;
     }
     return true;
 }());
 
-static_assert(utf8_width("兔") == 1);
-static_assert(utf8_width("€") == 1);
-static_assert(utf8_width("ß") == 1);
-static_assert(utf8_width("ÄEIÖÜ") == 5);
-static_assert(utf8_width("test") == 4);
+static_assert(utf8::width("兔") == 1);
+static_assert(utf8::width("€") == 1);
+static_assert(utf8::width("ß") == 1);
+static_assert(utf8::width("ÄEIÖÜ") == 5);
+static_assert(utf8::width("test") == 4);
