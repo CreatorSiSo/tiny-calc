@@ -46,7 +46,10 @@ static auto report_kind_to_string(ReportKind kind) -> std::string_view {
         case ReportKind::Note:
             return "Note";
         default:
-            panic("Case not covered");
+            panic(
+                "Internal Error: ReportKind <{}> not covered",
+                static_cast<uint8_t>(kind)
+            );
     }
 }
 

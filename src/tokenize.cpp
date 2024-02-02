@@ -23,7 +23,10 @@ auto Token::name() const -> std::string_view {
         case TokenKind::EndOfInput:
             return "EndOfInput";
         default:
-            panic("Case <{}> not covered", static_cast<uint8_t>(kind));
+            panic(
+                "Internal Error: TokenKind <{}> not covered",
+                static_cast<uint8_t>(kind)
+            );
     }
 }
 
