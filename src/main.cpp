@@ -4,11 +4,9 @@
 #include "print.hpp"
 #include "repl.hpp"
 
-static void write_help(std::ostream& out) {
+static void write_usage(std::ostream& out) {
     write(
         out,
-        "A very minimal terminal calculator with a bit of an unusual syntax.\n"
-        "\n"
         "Usage:\n"
         "  tiny-calc [OPTIONS]\n"
         "\n"
@@ -19,6 +17,14 @@ static void write_help(std::ostream& out) {
         "  --print-tokens     Print token streams\n"
         "  --print-chunks     Print compiled chunks\n"
     );
+}
+
+static void write_help(std::ostream& out) {
+    writeln(
+        out,
+        "A very minimal terminal calculator with a bit of an unusual syntax.\n"
+    );
+    write_usage(out);
 }
 
 auto main(int argc, char* argv[]) -> int {
@@ -43,7 +49,8 @@ auto main(int argc, char* argv[]) -> int {
         } else if (arg == "--print-chunks") {
             config.print_chunks = true;
         } else {
-            writeln(out, "Invalid argument <{}>", arg);
+            writeln(out, "Error: Invalid argument '{}'\n", arg);
+            write_usage(out);
             exit(-1);
         }
     }
