@@ -62,12 +62,16 @@ def run_test(test: Test):
     def escape(input: str) -> str:
         return input.encode("unicode_escape").decode("utf8")
 
-    print(f"  Command: '{cmd}'")
-    print(f"  ReturnCode: {child.returncode}")
-    print(f"  Input: {test.input}")
-    # print(f"  Expected: '{escape(test.expected)}'")
-    # print(f"  Stdout: '{escape(stdout)}'")
-    print("✔ Success" if test.expected == stdout else "✗ Failure")
+    if test.expected == stdout:
+        print("✔ Success")
+    else:
+        print(f"  Command: '{cmd}'")
+        print(f"  ReturnCode: {child.returncode}")
+        print(f"  Input: {test.input}")
+        print(f"  Expected: '{escape(test.expected)}'")
+        print(f"  Stdout: '{escape(stdout)}'")
+        print("✗ Failure")
+        exit(-1)
 
 
 for path in files_in_dir("tests"):
