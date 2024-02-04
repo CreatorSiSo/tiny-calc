@@ -10,11 +10,13 @@ from pathlib import Path
 
 
 def test_files(directory: str) -> list[Path]:
-    return [
-        file
-        for file in map(lambda file: Path(directory, file), os.listdir(directory))
-        if file.is_file() and file.suffix == ".snap"
-    ]
+    return sorted(
+        [
+            file
+            for file in map(lambda file: Path(directory, file), os.listdir(directory))
+            if file.is_file() and file.suffix == ".snap"
+        ]
+    )
 
 
 def escape(input: str) -> str:

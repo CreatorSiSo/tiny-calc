@@ -1,0 +1,43 @@
+---
+"title": "Examples"
+"description": "The example command prints a list of example expressions and their results. The results are currently precalculated and do not respect configuration flags."
+"args": ""
+"input": [":examples"]
+---
+Welcome to tiny-calc!
+Type :help if you are lost =)
+>>  ╭── Addition
+ │  >> + 1 2
+ │  3
+ │  >> + 10.2 - 0 0.2
+ │  10
+─╯
+ ╭── Subtraction
+ │  >> - 2 1
+ │  1
+─╯
+ ╭── Multiplication
+ │  >> * 5 0.4
+ │  2
+─╯
+ ╭── Division
+ │  >> / 1 2
+ │  0.5
+─╯
+ ╭── Functions
+ │  >> sin 0
+ │  0
+ │  >> cos 0
+ │  1
+─╯
+ ╭── Constants
+ │  >> pi
+ │  3.141592653589793
+ │  >> π
+ │  3.141592653589793
+ │  >> * 2 pi
+ │  6.283185307179586
+ │  >> cos * 2 π
+ │  1
+─╯
+>> CTRL+D

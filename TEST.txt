@@ -5,68 +5,43 @@ Snapshot tests can be found in the `tests` folder.
 The output of a test combines `stdin`, `stdout` and `stderr` in one string.
 
 
-## Constants
+## Addition
 
-Command: tiny-calc --plain
-Inputs: ["pi\n"]
+Command: tiny-calc --print-tokens --print-chunks
+Inputs: ["+ 1 + 2 + 3 + 4 5\n"]
 Output:
 ```
-3.141592653589793
-
-```
-
-## Plain output
-
-Command: tiny-calc --plain
-Inputs: ["+ 1 2\n", "+ 20 + 19 + 18 + 17 + 16 + 15 + 14 + 13 + 12 + 11 + 10 9\n", "* 20 0.11\n", "/ 5 2\n", "/ 18 2.2\n"]
-Output:
-```
-3
-174
-2.2
-2.5
-8.181818181818182
-
-```
-
-## Command line help
-
-Command: tiny-calc --help
-Inputs: []
-Output:
-```
-A very minimal terminal calculator with a bit of an unusual syntax.
-
-Usage:
-  tiny-calc [OPTIONS]
-
-Options:
-  -h, --help, -?     Print this help message
-  --plain            Only print the results of the calculation,
-                     or error messages (useful for piping)
-  --print-tokens     Print token streams
-  --print-chunks     Print compiled chunks
-
-```
-
-## Wrong command line arguments
-
-Command: tiny-calc --test -- -9 -10
-Inputs: []
-Output:
-```
-Error: Invalid argument '--test'
-
-Usage:
-  tiny-calc [OPTIONS]
-
-Options:
-  -h, --help, -?     Print this help message
-  --plain            Only print the results of the calculation,
-                     or error messages (useful for piping)
-  --print-tokens     Print token streams
-  --print-chunks     Print compiled chunks
-
+Welcome to tiny-calc!
+Type :help if you are lost =)
+>> + 1 + 2 + 3 + 4 5
+Tokens:
+    Plus[+] 0..1
+    Number[1] 2..3
+    Plus[+] 4..5
+    Number[2] 6..7
+    Plus[+] 8..9
+    Number[3] 10..11
+    Plus[+] 12..13
+    Number[4] 14..15
+    Number[5] 16..17
+OpCodes:
+    [0] Literal
+    [1] Literal
+    [2] Add
+    [3] Literal
+    [4] Add
+    [5] Literal
+    [6] Add
+    [7] Literal
+    [8] Add
+Literals:
+    [0] 5
+    [1] 4
+    [2] 3
+    [3] 2
+    [4] 1
+15
+>> CTRL+D
 ```
 
 ## Command line arguments
@@ -106,42 +81,97 @@ Literals:
 >> CTRL+D
 ```
 
-## Addition
+## Wrong command line arguments
+
+Command: tiny-calc --test -- -9 -10
+Inputs: []
+Output:
+```
+Error: Invalid argument '--test'
+
+Usage:
+  tiny-calc [OPTIONS]
+
+Options:
+  -h, --help, -?     Print this help message
+  --plain            Only print the results of the calculation,
+                     or error messages (useful for piping)
+  --print-tokens     Print token streams
+  --print-chunks     Print compiled chunks
+
+```
+
+## Constants
+
+Command: tiny-calc --plain
+Inputs: ["pi\n"]
+Output:
+```
+3.141592653589793
+
+```
+
+## Empty lines
+
+Lines that contain only whitespace are skipped.
 
 Command: tiny-calc --print-tokens --print-chunks
-Inputs: ["+ 1 + 2 + 3 + 4 5\n"]
+Inputs: ["\n", "\t\t\n", "  \n"]
 Output:
 ```
 Welcome to tiny-calc!
 Type :help if you are lost =)
->> + 1 + 2 + 3 + 4 5
-Tokens:
-    Plus[+] 0..1
-    Number[1] 2..3
-    Plus[+] 4..5
-    Number[2] 6..7
-    Plus[+] 8..9
-    Number[3] 10..11
-    Plus[+] 12..13
-    Number[4] 14..15
-    Number[5] 16..17
-OpCodes:
-    [0] Literal
-    [1] Literal
-    [2] Add
-    [3] Literal
-    [4] Add
-    [5] Literal
-    [6] Add
-    [7] Literal
-    [8] Add
-Literals:
-    [0] 5
-    [1] 4
-    [2] 3
-    [3] 2
-    [4] 1
-15
+>> 
+>> 		
+>>   
+>> CTRL+D
+```
+
+## Examples
+
+The example command prints a list of example expressions and their results. The results are currently precalculated and do not respect configuration flags.
+
+Command: tiny-calc 
+Inputs: [":examples\n"]
+Output:
+```
+Welcome to tiny-calc!
+Type :help if you are lost =)
+>> :examples
+ ╭── Addition
+ │  >> + 1 2
+ │  3
+ │  >> + 10.2 - 0 0.2
+ │  10
+─╯
+ ╭── Subtraction
+ │  >> - 2 1
+ │  1
+─╯
+ ╭── Multiplication
+ │  >> * 5 0.4
+ │  2
+─╯
+ ╭── Division
+ │  >> / 1 2
+ │  0.5
+─╯
+ ╭── Functions
+ │  >> sin 0
+ │  0
+ │  >> cos 0
+ │  1
+─╯
+ ╭── Constants
+ │  >> pi
+ │  3.141592653589793
+ │  >> π
+ │  3.141592653589793
+ │  >> * 2 pi
+ │  6.283185307179586
+ │  >> cos * 2 π
+ │  1
+─╯
 >> CTRL+D
 ```
 
@@ -241,6 +271,40 @@ Literals:
 >> CTRL+D
 ```
 
+## Command line help
+
+Command: tiny-calc --help
+Inputs: []
+Output:
+```
+A very minimal terminal calculator with a bit of an unusual syntax.
+
+Usage:
+  tiny-calc [OPTIONS]
+
+Options:
+  -h, --help, -?     Print this help message
+  --plain            Only print the results of the calculation,
+                     or error messages (useful for piping)
+  --print-tokens     Print token streams
+  --print-chunks     Print compiled chunks
+
+```
+
+## Plain output
+
+Command: tiny-calc --plain
+Inputs: ["+ 1 2\n", "+ 20 + 19 + 18 + 17 + 16 + 15 + 14 + 13 + 12 + 11 + 10 9\n", "* 20 0.11\n", "/ 5 2\n", "/ 18 2.2\n"]
+Output:
+```
+3
+174
+2.2
+2.5
+8.181818181818182
+
+```
+
 ## REPL commands
 
 Command: tiny-calc 
@@ -278,19 +342,5 @@ Literals:
 0
 >> :quit
 
-```
-
-## Empty lines
-
-Command: tiny-calc --print-tokens --print-chunks
-Inputs: ["\n", "\t\t\n", "  \n"]
-Output:
-```
-Welcome to tiny-calc!
-Type :help if you are lost =)
->> 
->> 		
->>   
->> CTRL+D
 ```
 

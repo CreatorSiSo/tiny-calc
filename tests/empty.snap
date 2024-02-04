@@ -1,6 +1,6 @@
 ---
 "title": "Empty lines"
-"description": ""
+"description": "Lines that contain only whitespace are skipped."
 "args": "--print-tokens --print-chunks"
 "input": ["", "\t\t", "  "]
 ---
