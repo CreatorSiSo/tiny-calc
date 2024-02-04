@@ -1,18 +1,22 @@
 """Check all test cases and generate TEST.txt"""
 
+from __future__ import annotations
 import os
 import json
 import subprocess
+from pathlib import Path
 
 
-def files_in_dir(directory: str) -> list[str]:
+def test_files(directory: str) -> list[Path]:
     return [
         file
-        for file in map(
-            lambda file: os.path.join(directory, file), os.listdir(directory)
-        )
-        if os.path.isfile(file)
+        for file in map(lambda file: Path(directory, file), os.listdir(directory))
+        if file.is_file() and file.suffix == ".snap"
     ]
+
+
+def escape(input: str) -> str:
+    return input.encode("unicode_escape").decode("utf8")
 
 
 class Test:
@@ -21,62 +25,85 @@ class Test:
         self.input = input
         self.expected = expected
 
+    @staticmethod
+    def from_str(input: str) -> Test:
+        second_separator = input.find("---", 3)
 
-def read_test(test_config: str) -> Test:
-    second_separator = test_config.find("---", 3)
+        if second_separator == -1:
+            print(
+                f"<{path}>: Invalid test file format\n"
+                "    Missing front matter seperator"
+            )
+            exit(-1)
 
-    if second_separator == -1:
-        print(
-            f"<{path}>: Invalid test file format\n" "    Missing front matter seperator"
+        front_matter_string = (
+            "{" + ",".join(input[3:second_separator].strip().splitlines()) + "}"
         )
-        exit(-1)
 
-    front_matter_string = (
-        "{" + ",".join(test_config[3:second_separator].strip().splitlines()) + "}"
-    )
+        front_matter = json.loads(front_matter_string)
 
-    front_matter = json.loads(front_matter_string)
+        return Test(
+            front_matter["args"],
+            front_matter["input"],
+            input[second_separator + 4 :],
+        )
 
-    return Test(
-        front_matter["args"],
-        front_matter["input"],
-        test_config[second_separator + 4 :],
-    )
+    def to_str(self) -> str:
+        return (
+            "---\n"
+            f'"args": "{self.args}"\n'
+            f'"input": {json.dumps(self.input)}\n'
+            "---\n"
+            f"{self.expected}"
+        )
 
 
-def run_test(test: Test):
+def run_test(test: Test) -> tuple[int, str]:
     cmd = f"./tiny-calc {test.args}"
-    child = subprocess.Popen(
+    with subprocess.Popen(
         cmd,
         shell=True,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    for line in test.input:
-        child.stdin.write((line + "\n").encode("utf8"))
-    child.stdin.close()
-    child.wait()
-    stdout = child.stdout.read().decode("utf8")
+        stderr=subprocess.STDOUT,
+        text=True,
+    ) as child:
+        for input in test.input:
+            child.stdin.write(input + "\n")
+        child.stdin.close()
+        child.wait()
 
-    def escape(input: str) -> str:
-        return input.encode("unicode_escape").decode("utf8")
+        output = child.stdout.read()
+        return child.returncode, output
+
+
+for path in test_files("tests"):
+    print(f"\nRunning '{path}':")
+
+    test = Test.from_str(path.read_text())
+    returncode, stdout = run_test(test)
 
     if test.expected == stdout:
         print("✔ Success")
+        continue
+
+    # print(f"  Command: '{cmd}'")
+    # print(f"  ReturnCode: {returncode}")
+    # print(f"  Input: {test.input}")
+    # print(f"  Expected: '{escape(test.expected)}'")
+    # print(f"  Stdout: '{escape(stdout)}'")
+    print("✗ Failure")
+
+    new_test = Test(test.args, test.input, stdout)
+    new_path = path.with_suffix(".snap.new")
+    Path(new_path).write_text(new_test.to_str())
+    subprocess.run(
+        f"PAGER='' git diff --no-index {path} {new_path}",
+        shell=True,
+    )
+
+    answer = input("Accept this change? [Y/n]: ").strip().lower()
+    if answer == "n":
+        new_path.unlink()
     else:
-        print(f"  Command: '{cmd}'")
-        print(f"  ReturnCode: {child.returncode}")
-        print(f"  Input: {test.input}")
-        print(f"  Expected: '{escape(test.expected)}'")
-        print(f"  Stdout: '{escape(stdout)}'")
-        print("✗ Failure")
-        exit(-1)
-
-
-for path in files_in_dir("tests"):
-    print(f"\nRunning '{path}':")
-
-    with open(path) as file:
-        test = read_test(file.read())
-        run_test(test)
+        new_path.rename(path)

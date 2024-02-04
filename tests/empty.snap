@@ -1,0 +1,7 @@
+---
+"args": "--print-tokens --print-chunks"
+"input": ["", ""]
+---
+Welcome to tiny-calc!
+Type :help if you are lost =)
+>> >> >> CTRL+D

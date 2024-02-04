@@ -1,0 +1,86 @@
+---
+"args": "--print-tokens --print-chunks"
+"input": ["s 0", "sin * 2 pi", "c * 2 pi", "cos 0", "cos * 1.5 pi", "cos * / 1 4 pi"]
+---
+Welcome to tiny-calc!
+Type :help if you are lost =)
+>> Tokens:
+    Identifier[s] 0..1
+    Number[0] 2..3
+OpCodes:
+    [0] Literal
+    [1] Sin
+Literals:
+    [0] 0
+0
+>> Tokens:
+    Identifier[sin] 0..3
+    Star[*] 4..5
+    Number[2] 6..7
+    Identifier[pi] 8..10
+OpCodes:
+    [0] Literal
+    [1] Literal
+    [2] Mul
+    [3] Sin
+Literals:
+    [0] 3.141592653589793
+    [1] 2
+-2.4492935982947064e-16
+>> Tokens:
+    Identifier[c] 0..1
+    Star[*] 2..3
+    Number[2] 4..5
+    Identifier[pi] 6..8
+OpCodes:
+    [0] Literal
+    [1] Literal
+    [2] Mul
+    [3] Cos
+Literals:
+    [0] 3.141592653589793
+    [1] 2
+1
+>> Tokens:
+    Identifier[cos] 0..3
+    Number[0] 4..5
+OpCodes:
+    [0] Literal
+    [1] Cos
+Literals:
+    [0] 0
+1
+>> Tokens:
+    Identifier[cos] 0..3
+    Star[*] 4..5
+    Number[1.5] 6..9
+    Identifier[pi] 10..12
+OpCodes:
+    [0] Literal
+    [1] Literal
+    [2] Mul
+    [3] Cos
+Literals:
+    [0] 3.141592653589793
+    [1] 1.5
+-1.8369701987210297e-16
+>> Tokens:
+    Identifier[cos] 0..3
+    Star[*] 4..5
+    Slash[/] 6..7
+    Number[1] 8..9
+    Number[4] 10..11
+    Identifier[pi] 12..14
+OpCodes:
+    [0] Literal
+    [1] Literal
+    [2] Literal
+    [3] Div
+    [4] Mul
+    [5] Cos
+Literals:
+    [0] 3.141592653589793
+    [1] 4
+    [2] 1
+0.7071067811865476
+>> CTRL+D

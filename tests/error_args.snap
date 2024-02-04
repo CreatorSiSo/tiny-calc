@@ -1,0 +1,15 @@
+---
+"args": "--test -- -9 -10"
+"input": []
+---
+Error: Invalid argument '--test'
+
+Usage:
+  tiny-calc [OPTIONS]
+
+Options:
+  -h, --help, -?     Print this help message
+  --plain            Only print the results of the calculation,
+                     or error messages (useful for piping)
+  --print-tokens     Print token streams
+  --print-chunks     Print compiled chunks
