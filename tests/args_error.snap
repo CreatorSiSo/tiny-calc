@@ -1,4 +1,6 @@
 ---
+"title": "Wrong command line arguments"
+"description": ""
 "args": "--test -- -9 -10"
 "input": []
 ---

@@ -1,4 +1,6 @@
 ---
+"title": "Empty lines"
+"description": ""
 "args": "--print-tokens --print-chunks"
 "input": ["", ""]
 ---

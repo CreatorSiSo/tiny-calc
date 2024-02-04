@@ -1,4 +1,6 @@
 ---
+"title": "Command line arguments"
+"description": ""
 "args": "--print-tokens --print-chunks"
 "input": ["+ 1 2", "/ pi 2"]
 ---

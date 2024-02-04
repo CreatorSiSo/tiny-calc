@@ -1,4 +1,6 @@
 ---
+"title": "Constants"
+"description": ""
 "args": "--plain"
 "input": ["pi"]
 ---

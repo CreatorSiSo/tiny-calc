@@ -1,4 +1,6 @@
 ---
+"title": "Command line help"
+"description": ""
 "args": "--help"
 "input": []
 ---

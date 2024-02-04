@@ -1,4 +1,6 @@
 ---
+"title": "REPL commands"
+"description": ""
 "args": ""
 "input": [":help", ":?", ":invalid", ":chunks", ":tokens", "sin 0", ":quit"]
 ---
