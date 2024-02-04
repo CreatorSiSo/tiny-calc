@@ -24,6 +24,8 @@ def escape(input: str) -> str:
 
 
 class Test:
+    ParseError = str
+
     def __init__(
         self, title: str, description: str, args: str, input: list[str], expected: str
     ):
@@ -34,26 +36,18 @@ class Test:
         self.expected = expected
 
     @staticmethod
-    def from_str(input: str, path: Path) -> Test:
-        second_separator = input.find("---", 3)
+    def from_str(input: str) -> Test | ParseError:
+        front_matter, sep, expected = input[3:].partition("---\n")
+        if len(sep) == 0:
+            return Test.ParseError("Missing frontmatter seperator (---)")
 
-        if second_separator == -1:
-            print(
-                "\n"
-                f"'{path}': Invalid test file format\n"
-                "    Missing front matter seperator\n"
-            )
-            exit(-1)
-
-        front_matter_string = input[3:second_separator]
-        front_matter = json.loads(front_matter_string)
-
+        metadata = json.loads(front_matter)
         return Test(
-            title=front_matter["title"],
-            description=front_matter["description"],
-            args=front_matter["args"],
-            input=front_matter["input"],
-            expected=input[second_separator + 4 :],
+            title=metadata["title"],
+            description=metadata["description"],
+            args=metadata["args"],
+            input=metadata["input"],
+            expected=expected,
         )
 
     def to_str(self) -> str:
@@ -83,7 +77,11 @@ def run_test(test: Test) -> str:
 def validate_snapshot(path: Path) -> Test:
     print(f"\nRunning '{path}':")
 
-    test = Test.from_str(path.read_text(), path)
+    test = Test.from_str(path.read_text())
+    if type(test) is Test.ParseError:
+        print(f"\n'{path}': Invalid test file format\n    {test}\n")
+        exit(-1)
+
     stdout = run_test(test)
 
     if test.expected == stdout:
