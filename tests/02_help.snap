@@ -1,8 +1,10 @@
 ---
-"title": "Command line help"
-"description": ""
-"args": "--help"
-"input": []
+{
+  "title": "Command line help",
+  "description": "",
+  "args": "--help",
+  "input": []
+}
 ---
 A very minimal terminal calculator with a bit of an unusual syntax.
 

@@ -1,8 +1,14 @@
 ---
-"title": "Empty lines"
-"description": "Lines that contain only whitespace are skipped."
-"args": "--print-tokens --print-chunks"
-"input": ["", "\t\t", "  "]
+{
+  "title": "Empty lines",
+  "description": "Lines that contain only whitespace are skipped.",
+  "args": "--print-tokens --print-chunks",
+  "input": [
+    "",
+    "\t\t",
+    "  "
+  ]
+}
 ---
 Welcome to tiny-calc!
 Type :help if you are lost =)

@@ -1,8 +1,17 @@
 ---
-"title": "Functions"
-"description": ""
-"args": "--print-tokens --print-chunks"
-"input": ["s 0", "sin * 2 pi", "c * 2 pi", "cos 0", "cos * 1.5 pi", "cos * / 1 4 pi"]
+{
+  "title": "Functions",
+  "description": "",
+  "args": "--print-tokens --print-chunks",
+  "input": [
+    "s 0",
+    "sin * 2 pi",
+    "c * 2 pi",
+    "cos 0",
+    "cos * 1.5 pi",
+    "cos * / 1 4 pi"
+  ]
+}
 ---
 Welcome to tiny-calc!
 Type :help if you are lost =)

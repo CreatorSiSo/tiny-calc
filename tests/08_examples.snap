@@ -1,8 +1,12 @@
 ---
-"title": "Examples"
-"description": "The example command prints a list of example expressions and their results. The results are currently precalculated and do not respect configuration flags."
-"args": ""
-"input": [":examples"]
+{
+  "title": "Examples",
+  "description": "The example command prints a list of example expressions and their results.\nThe results are currently precalculated and do not respect configuration flags.",
+  "args": "",
+  "input": [
+    ":examples"
+  ]
+}
 ---
 Welcome to tiny-calc!
 Type :help if you are lost =)

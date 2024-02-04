@@ -1,8 +1,13 @@
 ---
-"title": "Command line arguments"
-"description": ""
-"args": "--print-tokens --print-chunks"
-"input": ["+ 1 2", "/ pi 2"]
+{
+  "title": "Command line arguments",
+  "description": "",
+  "args": "--print-tokens --print-chunks",
+  "input": [
+    "+ 1 2",
+    "/ pi 2"
+  ]
+}
 ---
 Welcome to tiny-calc!
 Type :help if you are lost =)

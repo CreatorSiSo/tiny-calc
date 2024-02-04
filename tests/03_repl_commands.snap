@@ -1,8 +1,18 @@
 ---
-"title": "REPL commands"
-"description": ""
-"args": ""
-"input": [":help", ":?", ":invalid", ":chunks", ":tokens", "sin 0", ":quit"]
+{
+  "title": "REPL commands",
+  "description": "",
+  "args": "",
+  "input": [
+    ":help",
+    ":?",
+    ":invalid",
+    ":chunks",
+    ":tokens",
+    "sin 0",
+    ":quit"
+  ]
+}
 ---
 Welcome to tiny-calc!
 Type :help if you are lost =)

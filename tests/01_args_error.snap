@@ -1,8 +1,10 @@
 ---
-"title": "Wrong command line arguments"
-"description": ""
-"args": "--test -- -9 -10"
-"input": []
+{
+  "title": "Wrong command line arguments",
+  "description": "",
+  "args": "--test -- -9 -10",
+  "input": []
+}
 ---
 Error: Invalid argument '--test'
 

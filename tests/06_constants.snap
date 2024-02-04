@@ -1,7 +1,11 @@
 ---
-"title": "Constants"
-"description": ""
-"args": "--plain"
-"input": ["pi"]
+{
+  "title": "Constants",
+  "description": "",
+  "args": "--plain",
+  "input": [
+    "pi"
+  ]
+}
 ---
 3.141592653589793
