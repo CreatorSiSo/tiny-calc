@@ -2,8 +2,8 @@
 "title": "Empty lines"
 "description": ""
 "args": "--print-tokens --print-chunks"
-"input": ["", ""]
+"input": ["", "\t\t", "  "]
 ---
 Welcome to tiny-calc!
 Type :help if you are lost =)
->> >> >> CTRL+D
+>> >> >> >> CTRL+D

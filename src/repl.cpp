@@ -1,5 +1,9 @@
 #include "repl.hpp"
 
+#include <algorithm>
+#include <iterator>
+#include <sstream>
+
 #include "compile.hpp"
 #include "interpret.hpp"
 #include "print.hpp"
@@ -125,9 +129,9 @@ static void print_chunk(std::ostream& out, const Chunk chunk) {
 
 [[noreturn]]
 void repl(std::istream& in, std::ostream& out, Config config) {
-    std::string line;
-
     bool pretty = !config.plain;
+    std::string line;
+    std::string without_whitespace;
 
     if (pretty)
         writeln(out, "Welcome to tiny-calc!\nType :help if you are lost =)");
@@ -139,7 +143,12 @@ void repl(std::istream& in, std::ostream& out, Config config) {
             if (pretty) write(out, "CTRL+D");
             exit(0);
         }
-        if (line.empty()) continue;
+
+        without_whitespace.clear();
+        for (char c : line) {
+            if (!std::isspace(c)) without_whitespace.push_back(c);
+        }
+        if (without_whitespace.empty()) continue;
 
         // Execute repl command (like :help or :tokens)
         if (line.at(0) == ':') {
