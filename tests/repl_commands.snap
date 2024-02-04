@@ -1,0 +1,28 @@
+---
+"args": ""
+"input": [":help", ":?", ":invalid", ":chunks", ":tokens", "sin 0", ":quit"]
+---
+Welcome to tiny-calc!
+Type :help if you are lost =)
+>> :help, :?      Print command help
+:examples      Print expression examples
+:quit, :exit   Exit calculator (or press CTRL+C)
+:tokens        Toggle printing token streams
+:chunks        Toggle printing compiled chunks
+>> :help, :?      Print command help
+:examples      Print expression examples
+:quit, :exit   Exit calculator (or press CTRL+C)
+:tokens        Toggle printing token streams
+:chunks        Toggle printing compiled chunks
+>> Error: Unkown command <:invalid>
+Note: Type <:help> for a list of valid commands
+>> >> >> Tokens:
+    Identifier[sin] 0..3
+    Number[0] 4..5
+OpCodes:
+    [0] Literal
+    [1] Sin
+Literals:
+    [0] 0
+0
+>> 
