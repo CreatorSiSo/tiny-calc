@@ -11,8 +11,5 @@ alias t := test
 @test:
     python3 test.py
 
-@clean:
-    rm -rf build/*
-
 @format:
     clang-format src/*.cpp -i
