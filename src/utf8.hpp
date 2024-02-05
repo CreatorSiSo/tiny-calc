@@ -31,7 +31,9 @@ struct Unit {
      * Length is one if the unit is not a valid start byte.
      */
     constexpr auto length() -> uint8_t {
-        if (kind == UnitKind::Follow || kind == UnitKind::Invalid) return 1;
+        if (kind == UnitKind::Follow || kind == UnitKind::Invalid) {
+            return 1;
+        }
         return static_cast<uint8_t>(kind);
     }
 };
@@ -82,7 +84,9 @@ struct Scalars {
      */
     constexpr static auto decode_scalar(std::string_view string)
         -> std::optional<Scalar> {
-        if (string.empty()) return {};
+        if (string.empty()) {
+            return {};
+        }
 
         constexpr uint32_t replacement_scalar = 0xFFFD;
         auto start_unit = decode_unit(string[0]);
@@ -91,12 +95,14 @@ struct Scalars {
 
         // index is also the amount of already consumed bytes
         for (uint8_t index = 1; index < length; index += 1) {
-            if (string.size() <= index)
+            if (string.size() <= index) {
                 return {{.scalar = replacement_scalar, .length = index}};
+            }
 
             auto follow_unit = decode_unit(string[index]);
-            if (follow_unit.kind != UnitKind::Follow)
+            if (follow_unit.kind != UnitKind::Follow) {
                 return {{.scalar = replacement_scalar, .length = index}};
+            }
 
             scalar <<= 6;
             scalar |= follow_unit.data;
