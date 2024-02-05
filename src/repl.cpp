@@ -111,7 +111,7 @@ static void print_tokens(
     }
 }
 
-static void print_chunk(std::ostream& out, const Chunk chunk) {
+static void print_chunk(std::ostream& out, const Chunk& chunk) {
     writeln(out, "OpCodes:");
     for (size_t i = 0; i < chunk.opcodes.size(); i += 1) {
         writeln(
@@ -155,13 +155,17 @@ void repl(Config config) {
         }
 
         if (get_input(std::cin, line) == InputEnd::Eof) {
-            if (pretty) write(out, "CTRL+D");
+            if (pretty) {
+                write(out, "CTRL+D");
+            }
             exit(0);
         }
 
         without_whitespace.clear();
         for (char c : line) {
-            if (!std::isspace(c)) without_whitespace.push_back(c);
+            if (!std::isspace(c)) {
+                without_whitespace.push_back(c);
+            }
         }
         if (without_whitespace.empty()) {
             continue;
@@ -180,7 +184,7 @@ void repl(Config config) {
             }
 
             std::vector<Span> error_spans;
-            for (auto& token : tokens) {
+            for (const Token& token : tokens) {
                 if (token.kind == TokenKind::Error) {
                     error_spans.push_back(token.span);
                 }

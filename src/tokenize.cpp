@@ -30,8 +30,8 @@ auto Token::name() const -> std::string_view {
     }
 }
 
-auto Token::source(std::string_view src) const -> std::string_view {
-    return span.source(src);
+auto Token::source(std::string_view source) const -> std::string_view {
+    return span.source(source);
 }
 
 /**
@@ -147,16 +147,17 @@ auto tokenize(std::string_view source) -> std::vector<Token> {
         }
 
         // Operators
-        if (chr == '+')
+        if (chr == '+') {
             push(TokenKind::Plus, Span(start, 1));
-        else if (chr == '-')
+        } else if (chr == '-') {
             push(TokenKind::Minus, Span(start, 1));
-        else if (chr == '*')
+        } else if (chr == '*') {
             push(TokenKind::Star, Span(start, 1));
-        else if (chr == '/')
+        } else if (chr == '/') {
             push(TokenKind::Slash, Span(start, 1));
-        else
+        } else {
             push(TokenKind::Error, Span(start, 1));
+        }
 
         start += 1;
     }

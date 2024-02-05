@@ -18,9 +18,8 @@ struct Token {
     Span span;
 
     Token(TokenKind kind_val, Span span_val) : kind(kind_val), span(span_val) {}
-
     auto name() const -> std::string_view;
-    auto source(std::string_view src) const -> std::string_view;
+    auto source(std::string_view source) const -> std::string_view;
 };
 
-auto tokenize(std::string_view str) -> std::vector<Token>;
+auto tokenize(std::string_view source) -> std::vector<Token>;

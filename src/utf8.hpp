@@ -156,9 +156,9 @@ struct Scalars {
 constexpr auto width(std::string_view string) -> size_t {
     size_t amount = 0;
 
-    for (auto _ : Scalars(string)) {
+    for (Scalar scalar : Scalars(string)) {
         // noop to silence unused variable warning
-        static_cast<void>(_);
+        static_cast<void>(scalar);
         amount += 1;
     }
 

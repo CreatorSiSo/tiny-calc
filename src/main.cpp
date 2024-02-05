@@ -5,7 +5,7 @@
 #include "repl.hpp"
 
 auto main(int argc, char* argv[]) -> int {
-    constexpr auto USAGE =
+    constexpr std::string_view USAGE =
         "Usage:\n"
         "  tiny-calc [OPTIONS]\n"
         "\n"
@@ -22,8 +22,8 @@ auto main(int argc, char* argv[]) -> int {
         .print_chunks = false,
     };
 
-    const auto args = std::vector<std::string>(argv, argv + argc);
-    for (const auto& arg : args | std::views::drop(1)) {
+    const std::vector<std::string> args(argv, argv + argc);
+    for (std::string_view arg : args | std::views::drop(1)) {
         if (arg == "-h" || arg == "--help" || arg == "-?") {
             writeln(
                 std::cout,

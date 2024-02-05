@@ -70,12 +70,12 @@ auto Compiler::compile_expr() -> std::optional<Report> {
     const Token& token = m_tokens.next();
 
     if (token.kind == TokenKind::Number) {
-        const auto result = parse_number(token.span, m_source);
-        if (result.has_value()) {
-            compile_literal(result.value());
+        const auto maybe_number = parse_number(token.span, m_source);
+        if (maybe_number.has_value()) {
+            compile_literal(maybe_number.value());
             return {};
         }
-        return result.error();
+        return maybe_number.error();
     }
 
     if (token.kind == TokenKind::Identifier) {
@@ -100,8 +100,9 @@ auto Compiler::compile_expr() -> std::optional<Report> {
         );
     }
 
-    if (auto maybe_opcode = kind_to_binary_op(token.kind))
+    if (const auto maybe_opcode = kind_to_binary_op(token.kind)) {
         return compile_binary(maybe_opcode.value());
+    }
 
     return Report(
         ReportKind::Error,
@@ -117,14 +118,17 @@ void Compiler::compile_literal(Number value) {
 
 auto Compiler::compile_unary(OpCode opcode) -> std::optional<Report> {
     m_opcodes.push_back(opcode);
-    if (auto report = compile_expr()) return report;
-    return {};
+    return compile_expr();
 }
 
 auto Compiler::compile_binary(OpCode opcode) -> std::optional<Report> {
     m_opcodes.push_back(opcode);
-    if (auto report_lhs = compile_expr()) return report_lhs;
-    if (auto report_lhs = compile_expr()) return report_lhs;
+    if (const std::optional<Report> report_lhs = compile_expr()) {
+        return report_lhs;
+    }
+    if (const std::optional<Report> report_lhs = compile_expr()) {
+        return report_lhs;
+    }
     return {};
 }
 
@@ -155,7 +159,7 @@ auto Compiler::TokenStream::next() -> const Token& {
 
 auto Compiler::TokenStream::expect(TokenKind expected_kind)
     -> std::optional<Report> {
-    auto& token = next();
+    const Token& token = next();
     if (token.kind == expected_kind) return {};
     return Report(
         ReportKind::Error,
