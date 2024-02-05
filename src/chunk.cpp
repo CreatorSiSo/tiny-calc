@@ -16,7 +16,7 @@ auto opcode_to_string(OpCode opcode) -> std::string_view {
             return "Cos";
         case OpCode::Sin:
             return "Sin";
-        case OpCode::Literal:
+        case OpCode::Load:
             return "Literal";
         default:
             panic(
@@ -27,9 +27,4 @@ auto opcode_to_string(OpCode opcode) -> std::string_view {
 }
 
 Chunk::Chunk(std::vector<OpCode>&& opcodes, std::vector<Number>&& literals)
-    : m_opcodes(std::move(opcodes)), m_literals(std::move(literals)) {}
-
-auto Chunk::opcodes() const -> const std::vector<OpCode>& { return m_opcodes; }
-auto Chunk::literals() const -> const std::vector<Number>& {
-    return m_literals;
-}
+    : opcodes(std::move(opcodes)), literals(std::move(literals)) {}

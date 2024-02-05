@@ -20,10 +20,10 @@ auto interpret(const Chunk& chunk) -> Number {
     Stack stack;
     size_t literal_index = 0;
 
-    for (OpCode opcode : chunk.opcodes()) {
+    for (OpCode opcode : chunk.opcodes) {
         switch (opcode) {
-            case OpCode::Literal:
-                stack.push(chunk.literals().at(literal_index));
+            case OpCode::Load:
+                stack.push(chunk.literals.at(literal_index));
                 literal_index += 1;
                 break;
             case OpCode::Add:

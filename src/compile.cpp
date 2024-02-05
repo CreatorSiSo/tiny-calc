@@ -27,9 +27,9 @@ Compiler::Compiler(std::span<const Token> tokens, std::string_view source)
 
 static auto parse_number(Span span, std::string_view source)
     -> std::expected<Number, Report> {
-    auto filter_view = span.source(source) |
-                       std::views::filter([](char c) { return c != '_'; });
-    std::string filtered(filter_view.begin(), filter_view.end());
+    auto no_underscores = span.source(source) |
+                          std::views::filter([](char c) { return c != '_'; });
+    std::string filtered(no_underscores.begin(), no_underscores.end());
 
     try {
         return std::stod(filtered);
@@ -63,10 +63,6 @@ static auto kind_to_binary_op(TokenKind kind) -> std::optional<OpCode> {
     }
 }
 
-/**
- * @brief Parses tokens into an ast of expressions, mutates Parser.
- * @return Pointer to an upcasted expression tree.
- */
 auto Compiler::compile_expr() -> std::optional<Report> {
     const Token& token = m_tokens.next();
 
@@ -101,8 +97,8 @@ auto Compiler::compile_expr() -> std::optional<Report> {
         );
     }
 
-    if (auto opcode = kind_to_binary_op(token.kind))
-        return compile_binary(*opcode);
+    if (auto maybe_opcode = kind_to_binary_op(token.kind))
+        return compile_binary(maybe_opcode.value());
 
     return Report(
         ReportKind::Error,
@@ -112,7 +108,7 @@ auto Compiler::compile_expr() -> std::optional<Report> {
 }
 
 void Compiler::compile_literal(Number value) {
-    m_opcodes.push_back(OpCode::Literal);
+    m_opcodes.push_back(OpCode::Load);
     m_literals.push_back(value);
 }
 

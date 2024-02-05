@@ -31,8 +31,12 @@ struct Span {
     auto source(std::string_view string) const -> std::string_view;
 };
 
+/**
+ * @brief The category of a `Report`
+ */
 enum class ReportKind {
     Error,
+    Warning,
     Note,
 };
 

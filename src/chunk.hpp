@@ -23,7 +23,7 @@ enum class OpCode : uint8_t {
     /// pop A, push sin(A)
     Sin,
     /// push next literal
-    Literal,
+    Load,
 };
 
 /**
@@ -34,15 +34,12 @@ enum class OpCode : uint8_t {
 auto opcode_to_string(OpCode opcode) -> std::string_view;
 
 /**
- * @brief Represents valid, compiled output of an expression.
+ * @brief Represents a validated expression, compiled to opcodes and
+ *        literals.
  */
 struct Chunk {
     Chunk(std::vector<OpCode>&& m_opcodes, std::vector<Number>&& m_literals);
 
-    auto opcodes() const -> const std::vector<OpCode>&;
-    auto literals() const -> const std::vector<Number>&;
-
-   private:
-    std::vector<OpCode> m_opcodes;
-    std::vector<Number> m_literals;
+    const std::vector<OpCode> opcodes;
+    const std::vector<Number> literals;
 };

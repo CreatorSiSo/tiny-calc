@@ -7,7 +7,7 @@
 #include "tokenize.hpp"
 
 /**
- * @brief Transforms tokens into a Chunk.
+ * @brief Transforms tokens into a `Chunk`.
  */
 struct Compiler {
     /**

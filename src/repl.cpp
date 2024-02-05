@@ -114,16 +114,16 @@ static void print_tokens(
 }
 
 static void print_chunk(std::ostream& out, const Chunk chunk) {
-    const auto& opcodes = chunk.opcodes();
-    const auto& literals = chunk.literals();
-
     writeln(out, "OpCodes:");
-    for (size_t i = 0; i < opcodes.size(); i += 1) {
-        writeln(out, "{}[{}] {}", INDENT, i, opcode_to_string(opcodes[i]));
+    for (size_t i = 0; i < chunk.opcodes.size(); i += 1) {
+        writeln(
+            out, "{}[{}] {}", INDENT, i, opcode_to_string(chunk.opcodes[i])
+        );
     }
+
     writeln(out, "Literals:");
-    for (size_t i = 0; i < literals.size(); i += 1) {
-        writeln(out, "{}[{}] {}", INDENT, i, literals[i]);
+    for (size_t i = 0; i < chunk.literals.size(); i += 1) {
+        writeln(out, "{}[{}] {}", INDENT, i, chunk.literals[i]);
     }
 }
 
