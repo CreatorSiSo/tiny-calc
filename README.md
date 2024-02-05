@@ -24,7 +24,7 @@ Write a calculator, that evaluates any expression of this form.
 - `TEST.txt`: Documents all test cases and their user-perceived output
 - `build.py`: Compiles the project for development and generates `COMPILE.txt`
 - `test.py`: Validates snapshot tests and generates `TEST.txt`
-- `.clang-format`: Configuration file for `clang-format`
+- `justfile`: Defines the `just *` commands
 
 ## Building
 
@@ -47,6 +47,7 @@ Make sure that you have these tools installed before doing a development build o
 
 ### Usage
 
+- List all `just` commands via `just --list`
 - `just build` or `just b` are used to build the project
 - `just run` or `just r` are used to build and run the project
 - `just test` or `just t` are used to run all tests
