@@ -1,6 +1,19 @@
 # tiny-calc
 
-**TODO:** Project description.
+Final assignment for the module
+**C963 Foundations of Programming (Grundlagen der Programmierung)**
+from the first semester of my bachelor's degree.
+
+## Task
+
+Given, for example, a term in the form: `c + * 3.1 4 + 7 8` With the interpretation:
+
+- `c + * 3.1 4 + 7 8` the cosine of the result from `+ * 3.1 4 + 7 8`
+- `+ * 3.1 4 + 7 8` is interpreted as: Add `* 3.1 4` and `+ 7 8`
+- `* 3.1 4` is interpreted as the multiplication of `3.1` and `4`
+- `+ 7 8` is interpreted as the addition of `7` and `8`
+
+Write a calculator, that evaluates any expression of this form.
 
 ## Project Structure
 

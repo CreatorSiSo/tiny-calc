@@ -127,6 +127,19 @@ static void print_chunk(std::ostream& out, const Chunk chunk) {
     }
 }
 
+/**
+ * @brief Read evaluate print loop
+ *
+ * - Read input
+ * - Tokenize input
+ * - Compile tokens into chunk
+ * - Interpret chunk
+ * - Print solution or errors
+ *
+ * @param in Stdin (May be used for dependency injection)
+ * @param out Stdout (May be used for dependency injection)
+ * @param config Initial configuration from command line arguments
+ */
 [[noreturn]]
 void repl(std::istream& in, std::ostream& out, Config config) {
     bool pretty = !config.plain;
