@@ -17,18 +17,6 @@ auto Span::source(std::string_view source) const -> std::string_view {
     return std::string_view(source.substr(start, length));
 }
 
-Report::Report(ReportKind kind, std::string message)
-    : kind(kind), message(message) {}
-
-Report::Report(ReportKind kind, std::string message, std::vector<Span> spans)
-    : kind(kind), message(message), spans(spans) {}
-
-Report::Report(
-    ReportKind kind, std::string message, std::vector<Span> spans,
-    std::vector<std::pair<ReportKind, std::string>> comments
-)
-    : kind(kind), message(message), spans(spans), comments(comments) {}
-
 static auto repeat_string(std::string_view value, uint32_t times)
     -> std::string {
     std::string result;

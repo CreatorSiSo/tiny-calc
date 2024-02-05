@@ -66,21 +66,32 @@ static void write_examples(std::ostream& out) {
 static void run_command(
     std::ostream& out, Config& config, std::string_view name
 ) {
-    if (name == "help" || name == "?")
+    if (name == "help" || name == "?") {
         write_help(out);
-    else if (name == "examples")
+        return;
+    }
+    if (name == "examples") {
         write_examples(out);
-    else if (name == "tokens")
+        return;
+    }
+    if (name == "tokens") {
         config.print_tokens = !config.print_tokens;
-    else if (name == "chunks")
+        return;
+    }
+    if (name == "chunks") {
         config.print_chunks = !config.print_chunks;
-    else if (name == "quit" || name == "exit")
+        return;
+    }
+    if (name == "quit" || name == "exit") {
         exit(0);
-    else
-        Report(
-            ReportKind::Error, std::format("Unkown command <:{}>", name), {},
+    }
+
+    Report{
+        .kind = ReportKind::Error,
+        .message = std::format("Unkown command <:{}>", name),
+        .comments =
             {{ReportKind::Note, "Type <:help> for a list of valid commands"}}
-        ).write(out, "");
+    }.write(out, "");
 }
 
 enum class InputEnd {
@@ -190,11 +201,12 @@ void repl(Config config) {
                 }
             }
             if (!error_spans.empty()) {
-                Report(
-                    ReportKind::Error,
-                    error_spans.size() > 1 ? "Invalid Tokens" : "Invalid Token",
-                    error_spans
-                )
+                Report{
+                    .kind = ReportKind::Error,
+                    .message = error_spans.size() > 1 ? "Invalid Tokens"
+                                                      : "Invalid Token",
+                    .spans = error_spans
+                }
                     .write(out, line);
                 continue;
             }

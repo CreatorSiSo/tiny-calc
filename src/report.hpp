@@ -41,17 +41,10 @@ enum class ReportKind {
 };
 
 struct Report {
-    Report(ReportKind kind, std::string message);
-    Report(ReportKind kind, std::string message, std::vector<Span> spans);
-    Report(
-        ReportKind kind, std::string message, std::vector<Span> spans,
-        std::vector<std::pair<ReportKind, std::string>> notes
-    );
-
-    void write(std::ostream& out, std::string_view source) const;
-
     const ReportKind kind;
     const std::string message;
     const std::vector<Span> spans;
     const std::vector<std::pair<ReportKind, std::string>> comments;
+
+    void write(std::ostream& out, std::string_view source) const;
 };

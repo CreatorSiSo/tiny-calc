@@ -41,13 +41,18 @@ static auto parse_number(Span span, std::string_view source)
             ReportKind::Note,
             std::format("{} is the maximum", std::numeric_limits<Number>::max())
         };
-        return std::unexpected(Report(
-            ReportKind::Error, "Number literal too large", {span}, {note}
-        ));
+        return std::unexpected(Report{
+            .kind = ReportKind::Error,
+            .message = "Number literal too large",
+            .spans = {span},
+            .comments = {note}
+        });
     } catch (const std::invalid_argument& _) {
-        return std::unexpected(
-            Report(ReportKind::Error, "Number literal invalid", {span})
-        );
+        return std::unexpected(Report{
+            .kind = ReportKind::Error,
+            .message = "Number literal invalid",
+            .spans = {span}
+        });
     }
 }
 
@@ -93,22 +98,22 @@ auto Compiler::compile_expr() -> std::optional<Report> {
         else if (ident == "sin" || ident == "s")
             return compile_unary(OpCode::Sin);
 
-        return Report(
+        return Report{
             ReportKind::Error,
             std::format("Unknown function or constant <{}>", ident),
             {token.span}
-        );
+        };
     }
 
     if (const auto maybe_opcode = kind_to_binary_op(token.kind)) {
         return compile_binary(maybe_opcode.value());
     }
 
-    return Report(
-        ReportKind::Error,
-        std::format("Expected expression, found <{}>", token.name()),
-        {token.span}
-    );
+    return Report{
+        .kind = ReportKind::Error,
+        .message = std::format("Expected expression, found <{}>", token.name()),
+        .spans = {token.span}
+    };
 }
 
 void Compiler::compile_literal(Number value) {
@@ -160,10 +165,13 @@ auto Compiler::TokenStream::next() -> const Token& {
 auto Compiler::TokenStream::expect(TokenKind expected_kind)
     -> std::optional<Report> {
     const Token& token = next();
-    if (token.kind == expected_kind) return {};
-    return Report(
-        ReportKind::Error,
-        std::format("Excpected <EndOfInput> found <{}>", token.name()),
-        {token.span}
-    );
+    if (token.kind == expected_kind) {
+        return {};
+    }
+    return Report{
+        .kind = ReportKind::Error,
+        .message =
+            std::format("Excpected <EndOfInput> found <{}>", token.name()),
+        .spans = {token.span}
+    };
 }
