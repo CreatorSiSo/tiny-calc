@@ -45,7 +45,7 @@ Make sure that you have these tools installed before doing a development build o
 - `git` https://git-scm.com
 - `python` https://www.python.org
 
-### Usage
+### Scripts
 
 - List all `just` commands via `just --list`
 - `just build` or `just b` are used to build the project
