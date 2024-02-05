@@ -64,7 +64,7 @@ static void write_examples(std::ostream& out) {
 }
 
 static void run_command(
-    std::string_view name, Config& config, std::ostream& out
+    std::ostream& out, Config& config, std::string_view name
 ) {
     if (name == "help" || name == "?")
         write_help(out);
@@ -93,10 +93,8 @@ static auto get_input(std::istream& in, std::string& line) -> InputEnd {
 
     while (true) {
         char next = static_cast<char>(in.get());
-
         if (next == '\n') return InputEnd::Newline;
         if (next == std::char_traits<char>::eof()) return InputEnd::Eof;
-
         line.push_back(next);
     }
 }
@@ -141,18 +139,22 @@ static void print_chunk(std::ostream& out, const Chunk chunk) {
  * @param config Initial configuration from command line arguments
  */
 [[noreturn]]
-void repl(std::istream& in, std::ostream& out, Config config) {
+void repl(Config config) {
     bool pretty = !config.plain;
     std::string line;
     std::string without_whitespace;
+    std::ostream& out = std::cout;
 
-    if (pretty)
+    if (pretty) {
         writeln(out, "Welcome to tiny-calc!\nType :help if you are lost =)");
+    }
 
     while (true) {
-        if (pretty) write(out, ">> ");
+        if (pretty) {
+            write(out, ">> ");
+        }
 
-        if (get_input(in, line) == InputEnd::Eof) {
+        if (get_input(std::cin, line) == InputEnd::Eof) {
             if (pretty) write(out, "CTRL+D");
             exit(0);
         }
@@ -161,22 +163,27 @@ void repl(std::istream& in, std::ostream& out, Config config) {
         for (char c : line) {
             if (!std::isspace(c)) without_whitespace.push_back(c);
         }
-        if (without_whitespace.empty()) continue;
-
-        // Execute repl command (like :help or :tokens)
-        if (line.at(0) == ':') {
-            run_command(line.substr(1), config, out);
+        if (without_whitespace.empty()) {
             continue;
         }
 
-        auto tokens = tokenize(line);
+        // Execute repl command (like :help or :tokens)
+        if (line.at(0) == ':') {
+            run_command(out, config, line.substr(1));
+            continue;
+        }
+
+        std::vector<Token> tokens = tokenize(line);
         {
-            if (config.print_tokens) print_tokens(out, tokens, line);
+            if (config.print_tokens) {
+                print_tokens(out, tokens, line);
+            }
 
             std::vector<Span> error_spans;
             for (auto& token : tokens) {
-                if (token.kind == TokenKind::Error)
+                if (token.kind == TokenKind::Error) {
                     error_spans.push_back(token.span);
+                }
             }
             if (!error_spans.empty()) {
                 Report(
@@ -189,16 +196,18 @@ void repl(std::istream& in, std::ostream& out, Config config) {
             }
         }
 
-        auto chunk = Compiler::compile(tokens, line);
+        auto maybe_chunk = Compiler::compile(tokens, line);
         {
-            if (!chunk.has_value()) {
-                chunk.error().write(out, line);
+            if (!maybe_chunk.has_value()) {
+                maybe_chunk.error().write(out, line);
                 continue;
             }
-            if (config.print_chunks) print_chunk(out, *chunk);
+            if (config.print_chunks) {
+                print_chunk(out, maybe_chunk.value());
+            }
         }
 
-        auto result = interpret(*chunk);
+        Number result = interpret(maybe_chunk.value());
         writeln(out, "{}", result);
     }
 }

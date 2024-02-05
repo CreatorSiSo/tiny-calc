@@ -9,10 +9,13 @@ auto Compiler::compile(std::span<const Token> tokens, std::string_view source)
     -> std::expected<Chunk, Report> {
     Compiler compiler(tokens, source);
 
-    if (const auto report = compiler.compile_expr())
-        return std::unexpected(*report);
-    if (const auto report = compiler.m_tokens.expect(TokenKind::EndOfInput))
-        return std::unexpected(*report);
+    if (const auto maybe_report = compiler.compile_expr()) {
+        return std::unexpected(maybe_report.value());
+    }
+    if (const auto maybe_report =
+            compiler.m_tokens.expect(TokenKind::EndOfInput)) {
+        return std::unexpected(maybe_report.value());
+    }
 
     // opcodes and literals are pushed back in reverse order,
     // reversing them puts them in the correct order for execution
@@ -125,17 +128,19 @@ auto Compiler::compile_binary(OpCode opcode) -> std::optional<Report> {
     return {};
 }
 
-Compiler::TokenStream::TokenStream(std::span<const Token> tokens)
-    : m_tokens(tokens),
-      m_end_of_input(Token(TokenKind::EndOfInput, Span(0, 0))) {
+static auto end_of_input_span(std::span<const Token> tokens) -> Span {
     // Index of last character of last token
     size_t last_index = 0;
-    if (!m_tokens.empty()) {
-        Span last_span = m_tokens.back().span;
+    if (!tokens.empty()) {
+        Span last_span = tokens.back().span;
         last_index = last_span.start + last_span.length;
     }
-    m_end_of_input.span.start = last_index;
+    return Span(last_index, 0);
 }
+
+Compiler::TokenStream::TokenStream(std::span<const Token> tokens)
+    : m_end_of_input(Token(TokenKind::EndOfInput, end_of_input_span(tokens))),
+      m_tokens(tokens) {}
 
 auto Compiler::TokenStream::next() -> const Token& {
     if (m_tokens.empty()) {

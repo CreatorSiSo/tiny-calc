@@ -9,5 +9,11 @@ struct Config {
     bool print_chunks;
 };
 
+/**
+ * @brief
+ * @param in
+ * @param out
+ * @param config
+ */
 [[noreturn]]
-void repl(std::istream& in, std::ostream& out, Config config);
+void repl(Config config);

@@ -6,7 +6,7 @@ import sys
 
 compiler = "g++"
 wrapper = "sccache"
-flags = "-std=c++23 -Wall -Wno-c++98-compat -Wno-padded" # -O3
+flags = "-std=c++23 -Wall -Wno-c++98-compat -Wno-padded"  # -O3
 
 project_name = "tiny-calc"
 units = [
@@ -34,7 +34,7 @@ if not os.path.exists("build"):
 error = False
 for unit in units:
     cmd = f"{wrapper} {compiler} -c {flags} -fdiagnostics-color src/{unit}.cpp -o build/{unit}.o"
-    result = subprocess.call(cmd, shell = True)
+    result = subprocess.call(cmd, shell=True)
     if result != 0:
         error = True
 

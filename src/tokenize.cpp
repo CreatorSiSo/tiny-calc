@@ -58,7 +58,9 @@ static auto validate_whitespace(std::string_view source) -> size_t {
  * @return Length, in bytes, of the consumed characters.
  */
 static auto validate_number(std::string_view source) -> size_t {
-    if (!std::isdigit(source.at(0))) return 0;
+    if (source.empty() || !std::isdigit(source.at(0))) {
+        return 0;
+    }
 
     size_t length = 1;
     auto integers = source.substr(length);
@@ -121,7 +123,7 @@ auto tokenize(std::string_view source) -> std::vector<Token> {
     };
 
     while (start < source.length()) {
-        auto rest = source.substr(start);
+        std::string_view rest = source.substr(start);
         char chr = source.at(start);
 
         size_t whitespace_len = validate_whitespace(rest);

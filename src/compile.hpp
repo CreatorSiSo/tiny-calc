@@ -38,8 +38,8 @@ struct Compiler {
         auto expect(TokenKind expected_kind) -> std::optional<Report>;
 
        private:
+        const Token m_end_of_input;
         std::span<const Token> m_tokens;
-        Token m_end_of_input;
     };
 
     Compiler(std::span<const Token> tokens, std::string_view source);

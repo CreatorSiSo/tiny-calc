@@ -16,9 +16,6 @@ auto main(int argc, char* argv[]) -> int {
         "  --print-tokens     Print token streams\n"
         "  --print-chunks     Print compiled chunks\n";
 
-    std::istream& in = std::cin;
-    std::ostream& out = std::cout;
-
     Config config{
         .plain = false,
         .print_tokens = false,
@@ -29,11 +26,11 @@ auto main(int argc, char* argv[]) -> int {
     for (const auto& arg : args | std::views::drop(1)) {
         if (arg == "-h" || arg == "--help" || arg == "-?") {
             writeln(
-                out,
+                std::cout,
                 "A very minimal terminal calculator with a bit of an unusual "
                 "syntax."
             );
-            write(out, "\n{}", USAGE);
+            write(std::cout, "\n{}", USAGE);
             exit(0);
         } else if (arg == "--plain") {
             config.plain = true;
@@ -42,11 +39,11 @@ auto main(int argc, char* argv[]) -> int {
         } else if (arg == "--print-chunks") {
             config.print_chunks = true;
         } else {
-            writeln(out, "Error: Invalid argument '{}'", arg);
-            write(out, "\n{}", USAGE);
+            writeln(std::cout, "Error: Invalid argument '{}'", arg);
+            write(std::cout, "\n{}", USAGE);
             exit(-1);
         }
     }
 
-    repl(in, out, config);
+    repl(config);
 }
