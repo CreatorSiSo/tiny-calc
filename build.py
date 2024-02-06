@@ -32,9 +32,9 @@ if shutil.which("mold") is None:
 
 # Generate compile command
 with open("COMPILE.txt", "w", encoding="ascii") as file:
+    files = ' '.join(map(lambda unit : f"src/{unit}.cpp", units))
     file.write(
-        f"{compiler} {' '.join(map(lambda unit : f"src/{unit}.cpp", units))}"
-        f" {release_flags} -o {project_name}\n"
+        f"{compiler} {files} {release_flags} -o {project_name}\n"
     )
 
 if not os.path.exists("build"):

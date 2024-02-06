@@ -1,7 +1,6 @@
 #include "report.hpp"
 
 #include <cassert>
-#include <format>
 #include <ranges>
 
 #include "print.hpp"
@@ -9,7 +8,7 @@
 Span::Span(size_t start, size_t length) : start(start), length(length) {}
 
 auto Span::debug() const -> std::string {
-    return std::format("{}..{}", start, start + length);
+    return concat(start, "..", start + length);
 }
 
 auto Span::source(std::string_view source) const -> std::string_view {
@@ -74,21 +73,23 @@ static void write_source_block(
     }
 
     // smallest start index of all spans
-    size_t min_start =
-        std::ranges::min(spans, {}, [](Span span) { return span.start; }).start;
+    size_t min_start = source.size();
+    for (Span span : spans) {
+        min_start = std::min(span.start, min_start);
+    }
     const auto [row, column] = row_colum(source, min_start);
 
-    writeln(out, " ╭──[repl:{}:{}]", row, column);
-    writeln(out, " │  {}", source);
-    writeln(out, "─╯  {}", underlines);
+    writeln(out, " ╭──[repl:", row, ":", column, "]");
+    writeln(out, " │  ", source);
+    writeln(out, "─╯  ", underlines);
 }
 
 void Report::write(std::ostream& out, std::string_view source) const {
-    writeln(out, "{}: {}", report_kind_to_string(kind), message);
+    writeln(out, report_kind_to_string(kind), ": ", message);
 
     if (!source.empty()) write_source_block(out, source, spans);
 
     for (auto& [kind, message] : comments) {
-        writeln(out, "{}: {}", report_kind_to_string(kind), message);
+        writeln(out, report_kind_to_string(kind), ": ", message);
     }
 }

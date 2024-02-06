@@ -46,8 +46,9 @@ auto interpret(const Chunk& chunk) -> Number {
                 break;
             default:
                 panic(
-                    "Internal Error: Unkown OpCode <{}>",
-                    static_cast<uint8_t>(opcode)
+                    "Internal Error: Unkown OpCode <",
+                    static_cast<uint8_t>(opcode),
+                    ">"
                 );
                 break;
         }

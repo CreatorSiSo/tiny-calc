@@ -1,80 +1,86 @@
 #pragma once
 
-#include <format>
 #include <iostream>
 #include <source_location>
+#include <string>
+#include <sstream>
 
 /**
- * @brief Formats and writes the provided message.
- *
- * Does not flush the output stream.
- * See `std::format` on how formatting works. (in the `format` header)
- *
- * @param out Output stream to write into.
- * @param fmt Message to inserted format arguments into.
- * @param ...args The arguments inserted into `fmt`.
+ * @brief Concatenates all arguments into a new string.
+ * @param ...args The arguments concatenated into one string.
+ *                Each argumanet has to be convertible to `std::string`.
  */
-template <typename... Args>
-inline void write(
-    std::ostream& out, std::format_string<Args&...> fmt, Args&&... args
-) {
-    out << std::format(fmt, args...);
+template<typename... Args>
+inline auto concat(Args... args) -> std::string {
+    std::stringstream result;
+    (result << ... << args);
+    return result.str();
 }
 
 /**
- * @brief Formats and writes the provided message and a newline ("\n").
+ * @brief Concatenates and writes the provided message parts.
  *
  * Does not flush the output stream.
- * See `std::format` on how formatting works. (in the `format` header)
  *
  * @param out Output stream to write into.
- * @param fmt Message to inserted format arguments into.
- * @param ...args The arguments inserted into `fmt`.
+ * @param ...args The arguments concatenated into one message.
+ */
+template <typename... Args>
+inline void write(
+    std::ostream& out, Args... args
+) {
+    out << concat(args...);
+}
+
+/**
+ * @brief Concatenates and writes the provided message parts and a newline ("\n").
+ *
+ * Does not flush the output stream.
+ *
+ * @param out Output stream to write into.
+ * @param ...args The arguments concatenated into one message.
  */
 template <typename... Args>
 inline void writeln(
-    std::ostream& out, std::format_string<Args&...> fmt, Args&&... args
+    std::ostream& out, Args... args
 ) {
-    out << std::format(fmt, args...) << "\n";
+    out << concat(args...) << "\n";
 }
 
 /**
  * @brief Used by `panic` to capture the `std::source_location` of the caller.
  */
-template <typename... Args>
-struct PanicFormat {
+struct LocationArg {
     /**
-     * @param fmt The underlying `format_string`.
-     * @param loc Location in source code, where the `format_string` is created.
+     * @param arg The underlying argument.
+     * @param loc Location in source code, where the argument is created.
      */
     template <class T>
-    consteval PanicFormat(
-        const T& fmt, std::source_location loc = std::source_location::current()
+    consteval LocationArg(
+        const T& arg, std::source_location loc = std::source_location::current()
     )
-        : fmt(fmt), loc(loc) {}
+        : arg(arg), loc(loc) {}
 
-    std::format_string<Args...> fmt;
+    std::string_view arg;
     std::source_location loc;
 };
 
 /**
- * @brief Formats and writes the provided message to stderr, then aborts.
+ * @brief Used to quit the program in case an unrecoverable error has been encountered.
  *
+ * Writes the provided message parts to stderr, then aborts.
  * Flushes the output stream.
- * See `std::format` on how formatting works. (in the `format` header)
  *
- * @param panic_fmt Message to inserted format arguments into.
- * @param ...args The arguments inserted into `panic_fmt`.
+ * @param ...args Message parts.
  */
 template <typename... Args>
 [[noreturn]]
 inline void panic(
-    PanicFormat<std::type_identity_t<Args>...> panic_fmt, Args&&... args
+    LocationArg loc_arg, Args... args
 ) {
-    auto msg = std::format(panic_fmt.fmt, std::forward<Args>(args)...);
     writeln(
-        std::cerr, "panicked at {}:{}:{}: {}", panic_fmt.loc.file_name(),
-        panic_fmt.loc.line(), panic_fmt.loc.column(), msg
+        std::cerr,  "panicked at ", loc_arg.loc.file_name(), ":", loc_arg.loc.line(),
+        ":", loc_arg.loc.column(), ": ", loc_arg.arg, args...
     );
     std::cerr.flush();
     abort();

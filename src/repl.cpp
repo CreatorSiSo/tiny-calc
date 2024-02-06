@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <sstream>
 
 #include "compile.hpp"
 #include "interpret.hpp"
@@ -88,7 +87,7 @@ static void run_command(
 
     Report{
         .kind = ReportKind::Error,
-        .message = std::format("Unkown command <:{}>", name),
+        .message = concat("Unkown command <:", name, ">"),
         .comments =
             {{ReportKind::Note, "Type <:help> for a list of valid commands"}}
     }.write(out, "");

@@ -2,8 +2,9 @@
 
 #include <algorithm>
 #include <cmath>
-#include <format>
 #include <ranges>
+
+#include "print.hpp"
 
 auto Compiler::compile(std::span<const Token> tokens, std::string_view source)
     -> std::expected<Chunk, Report> {
@@ -39,7 +40,7 @@ static auto parse_number(Span span, std::string_view source)
     } catch (const std::out_of_range& _) {
         std::pair<ReportKind, std::string> note = {
             ReportKind::Note,
-            std::format("{} is the maximum", std::numeric_limits<Number>::max())
+            concat(std::numeric_limits<Number>::max(), " is the maximum")
         };
         return std::unexpected(Report{
             .kind = ReportKind::Error,
@@ -100,7 +101,7 @@ auto Compiler::compile_expr() -> std::optional<Report> {
 
         return Report{
             ReportKind::Error,
-            std::format("Unknown function or constant <{}>", ident),
+            concat("Unknown function or constant <", ident, ">"),
             {token.span}
         };
     }
@@ -111,7 +112,7 @@ auto Compiler::compile_expr() -> std::optional<Report> {
 
     return Report{
         .kind = ReportKind::Error,
-        .message = std::format("Expected expression, found <{}>", token.name()),
+        .message = concat("Expected expression, found <", token.name(), ">"),
         .spans = {token.span}
     };
 }
@@ -170,8 +171,7 @@ auto Compiler::TokenStream::expect(TokenKind expected_kind)
     }
     return Report{
         .kind = ReportKind::Error,
-        .message =
-            std::format("Excpected <EndOfInput> found <{}>", token.name()),
+        .message = concat("Excpected <EndOfInput> found <", token.name(), ">"),
         .spans = {token.span}
     };
 }

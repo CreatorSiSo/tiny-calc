@@ -20,8 +20,9 @@ auto opcode_to_string(OpCode opcode) -> std::string_view {
             return "Literal";
         default:
             panic(
-                "Internal Error: OpCode <{}> not covered",
-                static_cast<uint8_t>(opcode)
+                "Internal Error: OpCode <",
+                std::to_string(static_cast<uint8_t>(opcode)),
+                "> not covered"
             );
     }
 }
