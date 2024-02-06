@@ -1,1 +1,1 @@
-g++ src/chunk.cpp src/compile.cpp src/interpret.cpp src/main.cpp src/repl.cpp src/report.cpp src/tokenize.cpp src/utf8.cpp -std=c++23 -Wall -Wno-c++98-compat -Wno-padded -o tiny-calc
+g++ src/chunk.cpp src/compile.cpp src/interpret.cpp src/main.cpp src/repl.cpp src/report.cpp src/tokenize.cpp -std=c++23 -Wall -Wno-c++98-compat -Wno-padded -O3 -flto=auto -o tiny-calc

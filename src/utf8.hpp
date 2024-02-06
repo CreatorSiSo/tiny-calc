@@ -62,7 +62,7 @@ struct Scalars {
     constexpr auto begin() const -> Scalars { return *this; }
     constexpr auto end() const -> Scalars { return Scalars(""); }
 
-    constexpr auto operator*() const -> const Scalar& { return *m_next; }
+    constexpr auto operator*() const -> const Scalar& { return m_next.value(); }
 
     constexpr auto operator++() -> Scalars& {
         if (m_next) {
@@ -172,3 +172,26 @@ constexpr auto width(std::string_view string) -> size_t {
 }
 
 }  // namespace utf8
+
+namespace test {
+
+static_assert([] {
+    std::array<std::string_view, 4> strings = {"兔", "€", "ß", "t"};
+    std::array<uint32_t, 4> scalars = {0x2F80F, 0x20AC, 0xDF, 0x74};
+    std::array<int8_t, 4> lengths = {4, 3, 2, 1};
+
+    for (size_t i = 0; i < strings.size(); i += 1) {
+        auto [scalar, length] = *utf8::Scalars(strings[i]);
+        if (scalar != scalars[i]) return false;
+        if (length != lengths[i]) return false;
+    }
+    return true;
+}());
+
+static_assert(utf8::width("兔") == 1);
+static_assert(utf8::width("€") == 1);
+static_assert(utf8::width("ß") == 1);
+static_assert(utf8::width("ÄEIÖÜ") == 5);
+static_assert(utf8::width("test") == 4);
+
+}  // namespace test

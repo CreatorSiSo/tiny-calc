@@ -41,9 +41,13 @@ Make sure that you have these tools installed before doing a development build o
 - `just` https://github.com/casey/just
 - `gcc` https://gcc.gnu.org
 - `clang-format` https://clang.llvm.org
-- `sccache` https://github.com/mozilla/sccache
 - `git` https://git-scm.com
 - `python` https://www.python.org
+
+And the following are optional (speed up build times):
+
+- `sccache` https://github.com/mozilla/sccache
+- `mold` https://github.com/rui314/mold
 
 ### Scripts
 
