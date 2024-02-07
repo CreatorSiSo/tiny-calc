@@ -28,7 +28,7 @@ Write a calculator, that evaluates any expression of this form.
 
 ## Building
 
-Make sure that you have a modern version of `gcc` installed before building.
+Make sure that you have a modern version of `gcc` installed before building. Needs C++23 support.
 
 To build the project simply execute the command found in `COMPILE.txt`.
 
