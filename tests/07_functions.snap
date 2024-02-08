@@ -1,7 +1,7 @@
 ---
 {
   "title": "Functions",
-  "description": "",
+  "description": "Cosine and sine are currently the only functions implemented.",
   "args": "--print-tokens --print-chunks",
   "input": [
     "s 0",

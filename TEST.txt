@@ -9,6 +9,8 @@ The output of a test combines `stdin`, `stdout` and `stderr` into one string.
 
 ## Command line arguments
 
+You can pass arguments to set some configuration flags.
+
 - Command: tiny-calc --print-tokens --print-chunks
 - Inputs: ["+ 1 2\n", "/ pi 2\n"]
 - Output:
@@ -46,6 +48,8 @@ Literals:
 
 ## Wrong command line arguments
 
+A help message is provided if the command line arguments are incorrect.
+
 - Command: tiny-calc --test -- -9 -10
 - Inputs: []
 - Output:
@@ -67,6 +71,8 @@ Options:
 
 ## Command line help
 
+The help message may also be printed by using the help argument.
+
 - Command: tiny-calc --help
 - Inputs: []
 - Output:
@@ -87,6 +93,8 @@ Options:
 ```
 
 ## REPL commands
+
+The repl used to evaluate expressions supports a few commands too.
 
 - Command: tiny-calc 
 - Inputs: [":help\n", ":?\n", ":invalid\n", ":chunks\n", ":tokens\n", "sin 0\n", ":quit\n"]
@@ -182,6 +190,8 @@ Literals:
 
 ## Constants
 
+Currently only pi exists as a constant.
+
 - Command: tiny-calc --plain
 - Inputs: ["pi\n"]
 - Output:
@@ -191,6 +201,8 @@ Literals:
 ```
 
 ## Functions
+
+Cosine and sine are currently the only functions implemented.
 
 - Command: tiny-calc --print-tokens --print-chunks
 - Inputs: ["s 0\n", "sin * 2 pi\n", "c * 2 pi\n", "cos 0\n", "cos * 1.5 pi\n", "cos * / 1 4 pi\n"]
@@ -374,6 +386,8 @@ Type ':help' if you are lost =)
 ```
 
 ## Plain output
+
+Useful when piping input to tiny-calc and processing its output.
 
 - Command: tiny-calc --plain
 - Inputs: ["+ 1 2\n", "+ 20 + 19 + 18 + 17 + 16 + 15 + 14 + 13 + 12 + 11 + 10 9\n", "* 20 0.11\n", "/ 5 2\n", "/ 18 2.2\n"]

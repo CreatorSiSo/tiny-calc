@@ -1,7 +1,7 @@
 ---
 {
   "title": "Wrong command line arguments",
-  "description": "",
+  "description": "A help message is provided if the command line arguments are incorrect.",
   "args": "--test -- -9 -10",
   "input": []
 }

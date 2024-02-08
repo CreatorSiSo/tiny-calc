@@ -1,7 +1,7 @@
 ---
 {
   "title": "Command line arguments",
-  "description": "",
+  "description": "You can pass arguments to set some configuration flags.",
   "args": "--print-tokens --print-chunks",
   "input": [
     "+ 1 2",
