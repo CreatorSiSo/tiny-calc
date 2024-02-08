@@ -1,3 +1,10 @@
+/**
+ * This project targets g++ version 12, which does not support the `format`
+ * header introduced in C++ 20.
+ * The functions provided in this header are thin wrappers around formatting
+ * with the left-shift operator and streams.
+ */
+
 #pragma once
 
 #include <iostream>
