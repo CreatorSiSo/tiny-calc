@@ -16,7 +16,12 @@ auto Span::source(std::string_view source) const -> std::string_view {
     return std::string_view(source.substr(start, length));
 }
 
-// TODO
+/**
+ * @brief Repeats `value`.
+ * @param value The string to repeat.
+ * @param times How often it should be repeated.
+ * @return A new string.
+ */
 static auto repeat_string(std::string_view value, uint32_t times)
     -> std::string {
     std::string result;
@@ -27,22 +32,17 @@ static auto repeat_string(std::string_view value, uint32_t times)
     return result;
 }
 
-// TODO
-static auto report_kind_to_string(ReportKind kind) -> std::string_view {
-    switch (kind) {
-        case ReportKind::Error:
-            return "Error";
-        case ReportKind::Note:
-            return "Note";
-        default:
-            panic(
-                "Internal Error: ReportKind <{}> not covered",
-                static_cast<uint8_t>(kind)
-            );
-    }
-}
-
-// TODO
+/**
+ * @brief The row and column of an index in a string.
+ *
+ * - Row is the amount of newlines before this index.
+ * - Column is the display width of the characters on the line that the index is
+ *   on up the index.
+ *
+ * @param source The string that the index refers to.
+ * @param index The index.
+ * @return The first element is the row and the second one is the column.
+ */
 static auto row_colum(std::string_view source, size_t index)
     -> std::pair<size_t, size_t> {
     std::string_view before_index = source.substr(0, index);
@@ -60,7 +60,15 @@ static auto row_colum(std::string_view source, size_t index)
     return {row, column};
 }
 
-// TODO
+/**
+ * @brief Write and format a string and its spans.
+ *
+ * Underlines spans in the string and wraps it in a block.
+ *
+ * @param out The stream to write into.
+ * @param source The string to be underlined.
+ * @param spans Spans that point to substrings in `source`.
+ */
 static void write_source_block(
     std::ostream& out, std::string_view source, std::span<const Span> spans
 ) {
@@ -86,6 +94,27 @@ static void write_source_block(
     writeln(out, " ╭──[repl:", row, ":", column, "]");
     writeln(out, " │  ", source);
     writeln(out, "─╯  ", underlines);
+}
+
+/**
+ * @brief Display name of a `ReportKind`.
+ * @param kind The `ReportKind`
+ * @return The name.
+ */
+static auto report_kind_to_string(ReportKind kind) -> std::string_view {
+    switch (kind) {
+        case ReportKind::Error:
+            return "Error";
+        case ReportKind::Warning:
+            return "Warning";
+        case ReportKind::Note:
+            return "Note";
+        default:
+            panic(
+                "Internal Error: ReportKind <{}> not covered",
+                static_cast<uint8_t>(kind)
+            );
+    }
 }
 
 std::string Report::format(std::string_view source) const {

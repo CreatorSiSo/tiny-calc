@@ -57,7 +57,12 @@ constexpr std::string_view EXAMPLES =
     " │  1\n"
     "─╯\n";
 
-/// TODO
+/**
+ * @brief Executes a repl command (colon followed by identifier)
+ * @param out The output stream to write messages into.
+ * @param config The global config (gets modified by some commands).
+ * @param name What command to run (without leading colon).
+ */
 static void run_command(
     std::ostream& out, Config& config, std::string_view name
 ) {
@@ -95,7 +100,12 @@ enum class InputEnd {
     Eof,
 };
 
-// TODO
+/**
+ * @brief Reads `char`s until "\n" or end of file is reached.
+ * @param in Input stream to read from.
+ * @param line Buffer that the input is read into.
+ * @return Why reading was stopped.
+ */
 static auto get_input(std::istream& in, std::string& line) -> InputEnd {
     line.clear();
 
@@ -107,9 +117,14 @@ static auto get_input(std::istream& in, std::string& line) -> InputEnd {
     }
 }
 
-// TODO
+/**
+ * @brief Formats and prints all tokens for debugging in the repl.
+ * @param out Stream to write to.
+ * @param tokens The tokens to be printed.
+ * @param source The input string used to generate the tokens.
+ */
 static void print_tokens(
-    std::ostream& out, const std::vector<Token> tokens, std::string_view source
+    std::ostream& out, const std::vector<Token>& tokens, std::string_view source
 ) {
     writeln(out, "Tokens:");
     for (const auto& token : tokens) {
@@ -120,7 +135,11 @@ static void print_tokens(
     }
 }
 
-// TODO
+/**
+ * @brief Formats and prints a `Chunk` for debugging in the repl.
+ * @param out Stream to write to.
+ * @param chunk The `Chunk` to be printed.
+ */
 static void print_chunk(std::ostream& out, const Chunk& chunk) {
     writeln(out, "OpCodes:");
     for (size_t i = 0; i < chunk.opcodes.size(); i += 1) {

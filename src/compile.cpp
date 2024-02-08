@@ -29,7 +29,15 @@ auto Compiler::compile(std::span<const Token> tokens, std::string_view source)
 Compiler::Compiler(std::span<const Token> tokens, std::string_view source)
     : m_source(source), m_tokens(TokenStream(tokens)) {}
 
-// TODO
+/**
+ * @brief Parse a number from the substring that `span` points to.
+ *
+ * Generates a `Report` referencing the `span` if parsing fails.
+ *
+ * @param span Describes the substring of `source` to parse.
+ * @param source String used to generate `span`.
+ * @return Either a `Number` or a `Report`.
+ */
 static auto parse_number(Span span, std::string_view source)
     -> std::expected<Number, Report> {
     auto no_underscores = span.source(source) |
@@ -58,8 +66,12 @@ static auto parse_number(Span span, std::string_view source)
     }
 }
 
-// TODO
-static auto kind_to_binary_op(TokenKind kind) -> std::optional<OpCode> {
+/**
+ * @brief The corresponding binary operation for tokens that describe one.
+ * @param kind The `TokenKind` to analyze.
+ * @return The corresponding opcode or nothing.
+ */
+static auto token_kind_to_binary_op(TokenKind kind) -> std::optional<OpCode> {
     switch (kind) {
         case TokenKind::Plus:
             return OpCode::Add;
@@ -108,7 +120,7 @@ auto Compiler::compile_expr() -> std::optional<Report> {
         };
     }
 
-    if (const auto maybe_opcode = kind_to_binary_op(token.kind)) {
+    if (const auto maybe_opcode = token_kind_to_binary_op(token.kind)) {
         return compile_binary(maybe_opcode.value());
     }
 

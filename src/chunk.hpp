@@ -8,7 +8,7 @@
  * @brief Number type used when evaluating the expression.
  *
  * Not wrapped in a class to allow easy access to the underlying data
- * (needed to get the max value)
+ * (needed to get the max value and max precision)
  */
 using Number = double;
 
