@@ -52,32 +52,52 @@ struct Scalar {
 };
 
 /**
- * @brief Iterator over unicode scalars of a utf8 encoded `string_view`.
+ * @brief Iterator over unicode scalars of a UTF-8 encoded `string_view`.
+ *
+ * All public methods and operator overloads are implemented so that `Scalars`
+ * fulfils the iterator specification.
  */
 struct Scalars {
-    constexpr Scalars(std::string_view string) : m_data(string) {
-        m_next = decode_scalar(m_data);
-    }
+    constexpr Scalars(std::string_view string)
+        : m_data(string), m_current(decode_scalar(m_data)) {}
 
-    // TODO
+    /**
+     * @brief The current state of the `Scalars` itertor.
+     * @return Itself.
+     */
     constexpr auto begin() const -> Scalars { return *this; }
 
-    // TODO
+    /**
+     * @brief Iterator that is finished (consumed entire underlying string).
+     * @return Empty `Scalars` iterator.
+     */
     constexpr auto end() const -> Scalars { return Scalars(""); }
 
-    // TODO
-    constexpr auto operator*() const -> const Scalar& { return m_next.value(); }
+    /**
+     * @brief Get the current `Scalar`.
+     * @return Reference to the current `Scalar`.
+     */
+    constexpr auto operator*() const -> const Scalar& {
+        return m_current.value();
+    }
 
-    // TODO
+    /**
+     * @brief Decodes and stores the next `Scalar`.
+     * @return Reference the class instance used to call this function.
+     */
     constexpr auto operator++() -> Scalars& {
-        if (m_next) {
-            m_data = m_data.substr(m_next->length);
-            m_next = decode_scalar(m_data);
+        if (m_current) {
+            m_data = m_data.substr(m_current->length);
+            m_current = decode_scalar(m_data);
         }
         return *this;
     }
 
-    // TODO
+    /**
+     * @brief Compares itself with `other`.
+     * @param other The other iterator.
+     * @return Whether they are not equal.
+     */
     constexpr auto operator!=(const Scalars& other) const -> bool {
         return m_data != other.m_data;
     }
@@ -153,7 +173,7 @@ struct Scalars {
 
    private:
     std::string_view m_data;
-    std::optional<Scalar> m_next;
+    std::optional<Scalar> m_current;
 };
 
 /**
@@ -162,7 +182,7 @@ struct Scalars {
  * Does not properly handle graphemes that use more than one unicode scalar,
  * or have a display width larger than one. (Emojis like this: 🫵🏿, ...)
  *
- * @param string Utf8 encoded input.
+ * @param string UTF-8 encoded input.
  * @return Amount of unicode scalars.
  */
 constexpr auto width(std::string_view string) -> size_t {
