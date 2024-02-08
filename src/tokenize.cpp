@@ -108,11 +108,6 @@ static constexpr auto validate_identifier(std::string_view source) -> size_t {
     return length_ident;
 }
 
-/**
- * @brief Split the source string into tokens.
- * @param source Input source string.
- * @return All valid tokens and errors.
- */
 auto tokenize(std::string_view source) -> std::vector<Token> {
     std::vector<Token> tokens;
     // Index to first character of current token

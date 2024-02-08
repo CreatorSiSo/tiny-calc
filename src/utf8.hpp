@@ -59,11 +59,16 @@ struct Scalars {
         m_next = decode_scalar(m_data);
     }
 
+    // TODO
     constexpr auto begin() const -> Scalars { return *this; }
+
+    // TODO
     constexpr auto end() const -> Scalars { return Scalars(""); }
 
+    // TODO
     constexpr auto operator*() const -> const Scalar& { return m_next.value(); }
 
+    // TODO
     constexpr auto operator++() -> Scalars& {
         if (m_next) {
             m_data = m_data.substr(m_next->length);
@@ -72,6 +77,7 @@ struct Scalars {
         return *this;
     }
 
+    // TODO
     constexpr auto operator!=(const Scalars& other) const -> bool {
         return m_data != other.m_data;
     }
