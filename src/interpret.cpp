@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "print.hpp"
+#include "format.hpp"
 
 struct Stack {
     auto push(Number value) -> void { m_data.push_back(value); }
@@ -47,8 +47,7 @@ auto interpret(const Chunk& chunk) -> Number {
             default:
                 panic(
                     "Internal Error: Unkown OpCode <",
-                    static_cast<uint8_t>(opcode),
-                    ">"
+                    static_cast<uint8_t>(opcode), ">"
                 );
                 break;
         }

@@ -4,8 +4,8 @@
 #include <iterator>
 
 #include "compile.hpp"
+#include "format.hpp"
 #include "interpret.hpp"
-#include "print.hpp"
 #include "report.hpp"
 #include "tokenize.hpp"
 

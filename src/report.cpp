@@ -3,7 +3,7 @@
 #include <cassert>
 #include <ranges>
 
-#include "print.hpp"
+#include "format.hpp"
 
 Span::Span(size_t start, size_t length) : start(start), length(length) {}
 

@@ -2,7 +2,7 @@
 
 #include <cctype>
 
-#include "print.hpp"
+#include "format.hpp"
 
 auto Token::name() const -> std::string_view {
     switch (kind) {

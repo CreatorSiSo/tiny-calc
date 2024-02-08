@@ -2,15 +2,15 @@
 
 #include <iostream>
 #include <source_location>
-#include <string>
 #include <sstream>
+#include <string>
 
 /**
  * @brief Concatenates all arguments into a new string.
  * @param ...args The arguments concatenated into one string.
  *                Each argumanet has to be convertible to `std::string`.
  */
-template<typename... Args>
+template <typename... Args>
 inline auto concat(Args... args) -> std::string {
     std::stringstream result;
     (result << ... << args);
@@ -26,14 +26,12 @@ inline auto concat(Args... args) -> std::string {
  * @param ...args The arguments concatenated into one message.
  */
 template <typename... Args>
-inline void write(
-    std::ostream& out, Args... args
-) {
+inline void write(std::ostream& out, Args... args) {
     out << concat(args...);
 }
 
 /**
- * @brief Concatenates and writes the provided message parts and a newline ("\n").
+ * @brief Concatenates and writes the provided message parts and a newline `\\n`
  *
  * Does not flush the output stream.
  *
@@ -41,9 +39,7 @@ inline void write(
  * @param ...args The arguments concatenated into one message.
  */
 template <typename... Args>
-inline void writeln(
-    std::ostream& out, Args... args
-) {
+inline void writeln(std::ostream& out, Args... args) {
     out << concat(args...) << "\n";
 }
 
@@ -66,7 +62,8 @@ struct LocationArg {
 };
 
 /**
- * @brief Used to quit the program in case an unrecoverable error has been encountered.
+ * @brief Used to quit the program in case an unrecoverable error has been
+ * encountered.
  *
  * Writes the provided message parts to stderr, then aborts.
  * Flushes the output stream.
@@ -75,12 +72,11 @@ struct LocationArg {
  */
 template <typename... Args>
 [[noreturn]]
-inline void panic(
-    LocationArg loc_arg, Args... args
-) {
+inline void panic(LocationArg loc_arg, Args... args) {
     writeln(
-        std::cerr,  "panicked at ", loc_arg.loc.file_name(), ":", loc_arg.loc.line(),
-        ":", loc_arg.loc.column(), ": ", loc_arg.arg, args...
+        std::cerr, "panicked at ", loc_arg.loc.file_name(), ":",
+        loc_arg.loc.line(), ":", loc_arg.loc.column(), ": ", loc_arg.arg,
+        args...
     );
     std::cerr.flush();
     abort();

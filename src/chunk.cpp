@@ -1,6 +1,6 @@
 #include "chunk.hpp"
 
-#include "print.hpp"
+#include "format.hpp"
 
 auto opcode_to_string(OpCode opcode) -> std::string_view {
     switch (opcode) {
@@ -20,8 +20,7 @@ auto opcode_to_string(OpCode opcode) -> std::string_view {
             return "Literal";
         default:
             panic(
-                "Internal Error: OpCode <",
-                std::to_string(static_cast<uint8_t>(opcode)),
+                "Internal Error: OpCode <", static_cast<uint8_t>(opcode),
                 "> not covered"
             );
     }
