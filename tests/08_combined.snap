@@ -1,0 +1,37 @@
+---
+{
+  "title": "Combined",
+  "description": "This is how the expression used to explain the task looks like:",
+  "args": "--print-tokens --print-chunks",
+  "input": [
+    "c + * 3.1 4 + 7 8"
+  ]
+}
+---
+Welcome to tiny-calc!
+Type ':help' if you are lost =)
+>> Tokens:
+    Identifier[c] 0..1
+    Plus[+] 2..3
+    Star[*] 4..5
+    Number[3.1] 6..9
+    Number[4] 10..11
+    Plus[+] 12..13
+    Number[7] 14..15
+    Number[8] 16..17
+OpCodes:
+    [0] Literal
+    [1] Literal
+    [2] Add
+    [3] Literal
+    [4] Literal
+    [5] Mul
+    [6] Add
+    [7] Cos
+Literals:
+    [0] 8
+    [1] 7
+    [2] 4
+    [3] 3.1
+-0.6415079902223829
+>> CTRL+D
