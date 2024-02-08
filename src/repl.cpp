@@ -115,7 +115,7 @@ static void print_tokens(
     writeln(out, "Tokens:");
     for (const auto& token : tokens) {
         writeln(
-            out, "{}{}[{}] {}", INDENT, token.name(), token.source(source),
+            out, INDENT, token.name(), "[", token.source(source), "] ",
             token.span.debug()
         );
     }
@@ -124,14 +124,12 @@ static void print_tokens(
 static void print_chunk(std::ostream& out, const Chunk& chunk) {
     writeln(out, "OpCodes:");
     for (size_t i = 0; i < chunk.opcodes.size(); i += 1) {
-        writeln(
-            out, "{}[{}] {}", INDENT, i, opcode_to_string(chunk.opcodes[i])
-        );
+        writeln(out, INDENT, "[", i, "] ", opcode_to_string(chunk.opcodes[i]));
     }
 
     writeln(out, "Literals:");
     for (size_t i = 0; i < chunk.literals.size(); i += 1) {
-        writeln(out, "{}[{}] {}", INDENT, i, chunk.literals[i]);
+        writeln(out, INDENT, "[", i, "] ", chunk.literals[i]);
     }
 }
 
@@ -162,6 +160,7 @@ void repl(Config config) {
     while (true) {
         if (pretty) {
             write(out, ">> ");
+            out.flush();
         }
 
         if (get_input(std::cin, line) == InputEnd::Eof) {
@@ -223,6 +222,6 @@ void repl(Config config) {
         }
 
         Number result = interpret(maybe_chunk.value());
-        writeln(out, "{}", result);
+        writeln(out, result);
     }
 }

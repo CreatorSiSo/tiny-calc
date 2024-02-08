@@ -30,7 +30,7 @@ auto main(int argc, char* argv[]) -> int {
                 "A very minimal terminal calculator with a bit of an unusual "
                 "syntax."
             );
-            write(std::cout, "\n{}", USAGE);
+            writeln(std::cout, USAGE);
             exit(0);
         } else if (arg == "--plain") {
             config.plain = true;
@@ -39,8 +39,8 @@ auto main(int argc, char* argv[]) -> int {
         } else if (arg == "--print-chunks") {
             config.print_chunks = true;
         } else {
-            writeln(std::cout, "Error: Invalid argument '{}'", arg);
-            write(std::cout, "\n{}", USAGE);
+            writeln(std::cout, "Error: Invalid argument '", arg, "'");
+            writeln(std::cout, USAGE);
             exit(-1);
         }
     }
