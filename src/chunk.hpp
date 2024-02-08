@@ -4,6 +4,12 @@
 #include <string_view>
 #include <vector>
 
+/**
+ * @brief Number type used when evaluating the expression.
+ *
+ * Not wrapped in a class to allow easy access to the underlying data
+ * (needed to get the max value)
+ */
 using Number = double;
 
 /**

@@ -16,6 +16,7 @@ auto Span::source(std::string_view source) const -> std::string_view {
     return std::string_view(source.substr(start, length));
 }
 
+// TODO
 static auto repeat_string(std::string_view value, uint32_t times)
     -> std::string {
     std::string result;
@@ -26,6 +27,7 @@ static auto repeat_string(std::string_view value, uint32_t times)
     return result;
 }
 
+// TODO
 static auto report_kind_to_string(ReportKind kind) -> std::string_view {
     switch (kind) {
         case ReportKind::Error:
@@ -40,6 +42,7 @@ static auto report_kind_to_string(ReportKind kind) -> std::string_view {
     }
 }
 
+// TODO
 static auto row_colum(std::string_view source, size_t index)
     -> std::pair<size_t, size_t> {
     std::string_view before_index = source.substr(0, index);
@@ -57,6 +60,7 @@ static auto row_colum(std::string_view source, size_t index)
     return {row, column};
 }
 
+// TODO
 static void write_source_block(
     std::ostream& out, std::string_view source, std::span<const Span> spans
 ) {
@@ -84,12 +88,15 @@ static void write_source_block(
     writeln(out, "─╯  ", underlines);
 }
 
-void Report::write(std::ostream& out, std::string_view source) const {
-    writeln(out, report_kind_to_string(kind), ": ", message);
+std::string Report::format(std::string_view source) const {
+    std::stringstream out;
 
+    writeln(out, report_kind_to_string(kind), ": ", message);
     if (!source.empty()) write_source_block(out, source, spans);
 
     for (auto& [kind, message] : comments) {
         writeln(out, report_kind_to_string(kind), ": ", message);
     }
+
+    return out.str();
 }

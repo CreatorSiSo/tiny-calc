@@ -28,7 +28,7 @@ auto main(int argc, char* argv[]) -> int {
             writeln(
                 std::cout,
                 "A very minimal terminal calculator with a bit of an unusual "
-                "syntax."
+                "syntax.\n"
             );
             writeln(std::cout, USAGE);
             exit(0);
@@ -39,7 +39,7 @@ auto main(int argc, char* argv[]) -> int {
         } else if (arg == "--print-chunks") {
             config.print_chunks = true;
         } else {
-            writeln(std::cout, "Error: Invalid argument '", arg, "'");
+            writeln(std::cout, "Error: Invalid argument '", arg, "'\n");
             writeln(std::cout, USAGE);
             exit(-1);
         }

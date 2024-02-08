@@ -8,6 +8,7 @@
 #pragma once
 
 #include <iostream>
+#include <limits>
 #include <source_location>
 #include <sstream>
 #include <string>
@@ -20,6 +21,7 @@
 template <typename... Args>
 inline auto concat(Args... args) -> std::string {
     std::stringstream result;
+    result.precision(std::cout.precision());
     (result << ... << args);
     return result.str();
 }
@@ -34,7 +36,7 @@ inline auto concat(Args... args) -> std::string {
  */
 template <typename... Args>
 inline void write(std::ostream& out, Args... args) {
-    out << concat(args...);
+    (out << ... << args);
 }
 
 /**
@@ -47,7 +49,7 @@ inline void write(std::ostream& out, Args... args) {
  */
 template <typename... Args>
 inline void writeln(std::ostream& out, Args... args) {
-    out << concat(args...) << "\n";
+    (out << ... << args) << "\n";
 }
 
 /**

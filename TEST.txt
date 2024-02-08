@@ -14,7 +14,7 @@ The output of a test combines `stdin`, `stdout` and `stderr` into one string.
 - Output:
 ```
 Welcome to tiny-calc!
-Type :help if you are lost =)
+Type ':help' if you are lost =)
 >> + 1 2
 Tokens:
     Plus[+] 0..1
@@ -40,7 +40,7 @@ OpCodes:
 Literals:
     [0] 2
     [1] 3.141592653589793
-1.5707963267948966
+1.570796326794897
 >> CTRL+D
 ```
 
@@ -62,6 +62,7 @@ Options:
   --print-tokens     Print token streams
   --print-chunks     Print compiled chunks
 
+
 ```
 
 ## Command line help
@@ -82,6 +83,7 @@ Options:
   --print-tokens     Print token streams
   --print-chunks     Print compiled chunks
 
+
 ```
 
 ## REPL commands
@@ -91,7 +93,7 @@ Options:
 - Output:
 ```
 Welcome to tiny-calc!
-Type :help if you are lost =)
+Type ':help' if you are lost =)
 >> :help
 :help, :?      Print command help
 :examples      Print expression examples
@@ -105,8 +107,8 @@ Type :help if you are lost =)
 :tokens        Toggle printing token streams
 :chunks        Toggle printing compiled chunks
 >> :invalid
-Error: Unkown command <:invalid>
-Note: Type <:help> for a list of valid commands
+Error: Unkown command ':invalid'
+Note: Type ':help' for a list of valid commands
 >> :chunks
 >> :tokens
 >> sin 0
@@ -132,7 +134,7 @@ Lines that contain only whitespace are skipped.
 - Output:
 ```
 Welcome to tiny-calc!
-Type :help if you are lost =)
+Type ':help' if you are lost =)
 >> 
 >> 		
 >>   
@@ -142,12 +144,12 @@ Type :help if you are lost =)
 ## Addition
 
 - Command: tiny-calc --print-tokens --print-chunks
-- Inputs: ["+ 1 + 2 + 3 + 4 5\n"]
+- Inputs: ["+ 1 + 2 + 3 + 4 5_000\n"]
 - Output:
 ```
 Welcome to tiny-calc!
-Type :help if you are lost =)
->> + 1 + 2 + 3 + 4 5
+Type ':help' if you are lost =)
+>> + 1 + 2 + 3 + 4 5_000
 Tokens:
     Plus[+] 0..1
     Number[1] 2..3
@@ -157,7 +159,7 @@ Tokens:
     Number[3] 10..11
     Plus[+] 12..13
     Number[4] 14..15
-    Number[5] 16..17
+    Number[5_000] 16..21
 OpCodes:
     [0] Literal
     [1] Literal
@@ -169,12 +171,12 @@ OpCodes:
     [7] Literal
     [8] Add
 Literals:
-    [0] 5
+    [0] 5000
     [1] 4
     [2] 3
     [3] 2
     [4] 1
-15
+5010
 >> CTRL+D
 ```
 
@@ -195,7 +197,7 @@ Literals:
 - Output:
 ```
 Welcome to tiny-calc!
-Type :help if you are lost =)
+Type ':help' if you are lost =)
 >> s 0
 Tokens:
     Identifier[s] 0..1
@@ -220,7 +222,7 @@ OpCodes:
 Literals:
     [0] 3.141592653589793
     [1] 2
--2.4492935982947064e-16
+-2.449293598294706e-16
 >> c * 2 pi
 Tokens:
     Identifier[c] 0..1
@@ -260,7 +262,7 @@ OpCodes:
 Literals:
     [0] 3.141592653589793
     [1] 1.5
--1.8369701987210297e-16
+-1.83697019872103e-16
 >> cos * / 1 4 pi
 Tokens:
     Identifier[cos] 0..3
@@ -294,7 +296,7 @@ The results are currently precalculated and do not respect configuration flags.
 - Output:
 ```
 Welcome to tiny-calc!
-Type :help if you are lost =)
+Type ':help' if you are lost =)
 >> :examples
  ╭── Addition
  │  >> + 1 2

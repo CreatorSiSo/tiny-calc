@@ -15,7 +15,7 @@
 }
 ---
 Welcome to tiny-calc!
-Type :help if you are lost =)
+Type ':help' if you are lost =)
 >> :help, :?      Print command help
 :examples      Print expression examples
 :quit, :exit   Exit calculator (or press CTRL+C)
@@ -26,8 +26,8 @@ Type :help if you are lost =)
 :quit, :exit   Exit calculator (or press CTRL+C)
 :tokens        Toggle printing token streams
 :chunks        Toggle printing compiled chunks
->> Error: Unkown command <:invalid>
-Note: Type <:help> for a list of valid commands
+>> Error: Unkown command ':invalid'
+Note: Type ':help' for a list of valid commands
 >> >> >> Tokens:
     Identifier[sin] 0..3
     Number[0] 4..5

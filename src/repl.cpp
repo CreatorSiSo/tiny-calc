@@ -1,7 +1,10 @@
 #include "repl.hpp"
 
 #include <algorithm>
+#include <iomanip>
+#include <istream>
 #include <iterator>
+#include <ostream>
 
 #include "compile.hpp"
 #include "format.hpp"
@@ -9,68 +12,61 @@
 #include "report.hpp"
 #include "tokenize.hpp"
 
-constexpr const char* INDENT = "    ";
+constexpr std::string_view INDENT = "    ";
 
-static void write_help(std::ostream& out) {
-    write(
-        out,
-        ":help, :?      Print command help\n"
-        ":examples      Print expression examples\n"
-        ":quit, :exit   Exit calculator (or press CTRL+C)\n"
-        ":tokens        Toggle printing token streams\n"
-        ":chunks        Toggle printing compiled chunks\n"
-    );
-}
+constexpr std::string_view HELP =
+    ":help, :?      Print command help\n"
+    ":examples      Print expression examples\n"
+    ":quit, :exit   Exit calculator (or press CTRL+C)\n"
+    ":tokens        Toggle printing token streams\n"
+    ":chunks        Toggle printing compiled chunks\n";
 
-static void write_examples(std::ostream& out) {
-    write(
-        out,
-        " ╭── Addition\n"
-        " │  >> + 1 2\n"
-        " │  3\n"
-        " │  >> + 10.2 - 0 0.2\n"
-        " │  10\n"
-        "─╯\n"
-        " ╭── Subtraction\n"
-        " │  >> - 2 1\n"
-        " │  1\n"
-        "─╯\n"
-        " ╭── Multiplication\n"
-        " │  >> * 5 0.4\n"
-        " │  2\n"
-        "─╯\n"
-        " ╭── Division\n"
-        " │  >> / 1 2\n"
-        " │  0.5\n"
-        "─╯\n"
-        " ╭── Functions\n"
-        " │  >> sin 0\n"
-        " │  0\n"
-        " │  >> cos 0\n"
-        " │  1\n"
-        "─╯\n"
-        " ╭── Constants\n"
-        " │  >> pi\n"
-        " │  3.141592653589793\n"
-        " │  >> π\n"
-        " │  3.141592653589793\n"
-        " │  >> * 2 pi\n"
-        " │  6.283185307179586\n"
-        " │  >> cos * 2 π\n"
-        " │  1\n"
-        "─╯\n"
-    );
-}
+constexpr std::string_view EXAMPLES =
+    " ╭── Addition\n"
+    " │  >> + 1 2\n"
+    " │  3\n"
+    " │  >> + 10.2 - 0 0.2\n"
+    " │  10\n"
+    "─╯\n"
+    " ╭── Subtraction\n"
+    " │  >> - 2 1\n"
+    " │  1\n"
+    "─╯\n"
+    " ╭── Multiplication\n"
+    " │  >> * 5 0.4\n"
+    " │  2\n"
+    "─╯\n"
+    " ╭── Division\n"
+    " │  >> / 1 2\n"
+    " │  0.5\n"
+    "─╯\n"
+    " ╭── Functions\n"
+    " │  >> sin 0\n"
+    " │  0\n"
+    " │  >> cos 0\n"
+    " │  1\n"
+    "─╯\n"
+    " ╭── Constants\n"
+    " │  >> pi\n"
+    " │  3.141592653589793\n"
+    " │  >> π\n"
+    " │  3.141592653589793\n"
+    " │  >> * 2 pi\n"
+    " │  6.283185307179586\n"
+    " │  >> cos * 2 π\n"
+    " │  1\n"
+    "─╯\n";
 
+/// TODO
 static void run_command(
     std::ostream& out, Config& config, std::string_view name
 ) {
     if (name == "help" || name == "?") {
-        write_help(out);
+        write(out, HELP);
         return;
     }
     if (name == "examples") {
-        write_examples(out);
+        write(out, EXAMPLES);
         return;
     }
     if (name == "tokens") {
@@ -85,12 +81,13 @@ static void run_command(
         exit(0);
     }
 
-    Report{
+    Report report{
         .kind = ReportKind::Error,
-        .message = concat("Unkown command <:", name, ">"),
+        .message = concat("Unkown command ':", name, "'"),
         .comments =
-            {{ReportKind::Note, "Type <:help> for a list of valid commands"}}
-    }.write(out, "");
+            {{ReportKind::Note, "Type ':help' for a list of valid commands"}}
+    };
+    write(out, report.format(""));
 }
 
 enum class InputEnd {
@@ -98,6 +95,7 @@ enum class InputEnd {
     Eof,
 };
 
+// TODO
 static auto get_input(std::istream& in, std::string& line) -> InputEnd {
     line.clear();
 
@@ -109,6 +107,7 @@ static auto get_input(std::istream& in, std::string& line) -> InputEnd {
     }
 }
 
+// TODO
 static void print_tokens(
     std::ostream& out, const std::vector<Token> tokens, std::string_view source
 ) {
@@ -121,6 +120,7 @@ static void print_tokens(
     }
 }
 
+// TODO
 static void print_chunk(std::ostream& out, const Chunk& chunk) {
     writeln(out, "OpCodes:");
     for (size_t i = 0; i < chunk.opcodes.size(); i += 1) {
@@ -133,28 +133,18 @@ static void print_chunk(std::ostream& out, const Chunk& chunk) {
     }
 }
 
-/**
- * @brief Read evaluate print loop
- *
- * - Read input
- * - Tokenize input
- * - Compile tokens into chunk
- * - Interpret chunk
- * - Print solution or errors
- *
- * @param in Stdin (May be used for dependency injection)
- * @param out Stdout (May be used for dependency injection)
- * @param config Initial configuration from command line arguments
- */
 [[noreturn]]
 void repl(Config config) {
+    std::ostream& out = std::cout;
+    constexpr auto max_precision = std::numeric_limits<Number>::digits10 + 1;
+    out.precision(max_precision);
+
     bool pretty = !config.plain;
     std::string line;
     std::string without_whitespace;
-    std::ostream& out = std::cout;
 
     if (pretty) {
-        writeln(out, "Welcome to tiny-calc!\nType :help if you are lost =)");
+        writeln(out, "Welcome to tiny-calc!\nType ':help' if you are lost =)");
     }
 
     while (true) {
@@ -170,6 +160,7 @@ void repl(Config config) {
             exit(0);
         }
 
+        // Skip empty lines
         without_whitespace.clear();
         for (char c : line) {
             if (!std::isspace(c)) {
@@ -199,13 +190,13 @@ void repl(Config config) {
                 }
             }
             if (!error_spans.empty()) {
-                Report{
+                Report report{
                     .kind = ReportKind::Error,
                     .message = error_spans.size() > 1 ? "Invalid Tokens"
                                                       : "Invalid Token",
                     .spans = error_spans
-                }
-                    .write(out, line);
+                };
+                write(out, report.format(""));
                 continue;
             }
         }
@@ -213,7 +204,7 @@ void repl(Config config) {
         auto maybe_chunk = Compiler::compile(tokens, line);
         {
             if (!maybe_chunk.has_value()) {
-                maybe_chunk.error().write(out, line);
+                write(out, maybe_chunk.error().format(line));
                 continue;
             }
             if (config.print_chunks) {

@@ -10,7 +10,7 @@
 }
 ---
 Welcome to tiny-calc!
-Type :help if you are lost =)
+Type ':help' if you are lost =)
 >> Tokens:
     Plus[+] 0..1
     Number[1] 2..3
@@ -34,5 +34,5 @@ OpCodes:
 Literals:
     [0] 2
     [1] 3.141592653589793
-1.5707963267948966
+1.570796326794897
 >> CTRL+D

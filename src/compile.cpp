@@ -29,6 +29,7 @@ auto Compiler::compile(std::span<const Token> tokens, std::string_view source)
 Compiler::Compiler(std::span<const Token> tokens, std::string_view source)
     : m_source(source), m_tokens(TokenStream(tokens)) {}
 
+// TODO
 static auto parse_number(Span span, std::string_view source)
     -> std::expected<Number, Report> {
     auto no_underscores = span.source(source) |
@@ -57,6 +58,7 @@ static auto parse_number(Span span, std::string_view source)
     }
 }
 
+// TODO
 static auto kind_to_binary_op(TokenKind kind) -> std::optional<OpCode> {
     switch (kind) {
         case TokenKind::Plus:
@@ -138,6 +140,12 @@ auto Compiler::compile_binary(OpCode opcode) -> std::optional<Report> {
     return {};
 }
 
+/**
+ * @brief Creates a new span that points to the index after the last character
+ *        of the last token.
+ * @param tokens The tokens to analyze.
+ * @return Span of the end of input token.
+ */
 static auto end_of_input_span(std::span<const Token> tokens) -> Span {
     // Index of last character of last token
     size_t last_index = 0;

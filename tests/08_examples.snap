@@ -9,7 +9,7 @@
 }
 ---
 Welcome to tiny-calc!
-Type :help if you are lost =)
+Type ':help' if you are lost =)
 >>  ╭── Addition
  │  >> + 1 2
  │  3

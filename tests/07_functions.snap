@@ -14,7 +14,7 @@
 }
 ---
 Welcome to tiny-calc!
-Type :help if you are lost =)
+Type ':help' if you are lost =)
 >> Tokens:
     Identifier[s] 0..1
     Number[0] 2..3
@@ -37,7 +37,7 @@ OpCodes:
 Literals:
     [0] 3.141592653589793
     [1] 2
--2.4492935982947064e-16
+-2.449293598294706e-16
 >> Tokens:
     Identifier[c] 0..1
     Star[*] 2..3
@@ -74,7 +74,7 @@ OpCodes:
 Literals:
     [0] 3.141592653589793
     [1] 1.5
--1.8369701987210297e-16
+-1.83697019872103e-16
 >> Tokens:
     Identifier[cos] 0..3
     Star[*] 4..5
