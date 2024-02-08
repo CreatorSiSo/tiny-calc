@@ -13,7 +13,10 @@ enum class TokenKind {
     EndOfInput,
 };
 
-// TODO
+/**
+ * @brief Section of source code used to simplify compilation (especially
+ *        parsing).
+ */
 struct Token {
     TokenKind kind;
     Span span;

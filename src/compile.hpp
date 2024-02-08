@@ -32,7 +32,10 @@ struct Compiler {
         -> std::expected<Chunk, Report>;
 
    private:
-    // TODO
+    /**
+     * @brief Iterator over `Token`s. Does not implement the iterator
+     *        specification, as it is simply not needed.
+     */
     struct TokenStream {
         TokenStream(std::span<const Token> tokens);
 
@@ -57,16 +60,32 @@ struct Compiler {
 
     Compiler(std::span<const Token> tokens, std::string_view source);
 
-    // TODO
+    /**
+     * @brief Parses an expression from the internal `TokenStream` and generates
+     *        the corresponding `OpCode`s.
+     * @see `Compiler::compile` on what valid expressions are
+     * @return A `Report` explaining where and why compilation failed.
+     */
     auto compile_expr() -> std::optional<Report>;
 
-    // TODO
+    /**
+     * @brief Push literal value to literals and the `OpCode` for loading it.
+     * @param value The literal.
+     */
     void compile_literal(Number value);
 
-    // TODO
+    /**
+     * @brief Compiles the rest of a unary expression (after the operator).
+     * @param opcode
+     * @return A `Report` explaining where and why compilation failed.
+     */
     auto compile_unary(OpCode opcode) -> std::optional<Report>;
 
-    // TODO
+    /**
+     * @brief Compiles the rest of a binary expression (after the operator).
+     * @param opcode
+     * @return A `Report` explaining where and why compilation failed.
+     */
     auto compile_binary(OpCode opcode) -> std::optional<Report>;
 
     const std::string_view m_source;
